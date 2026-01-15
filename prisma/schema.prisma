@@ -48,6 +48,15 @@ model Resource {
   // Application info
   howToApply  String?
 
+  // Organization-specific tips
+  tips        String[]
+
+  // Spanish translations
+  nameEs        String?
+  descriptionEs String?
+  howToApplyEs  String?
+  tipsEs        String[]
+
   // Data source tracking
   source      String   @default("manual") // "manual", "211", "findhelp"
   sourceId    String?

@@ -14,6 +14,12 @@ export interface Resource {
   hours: string | null
   eligibility: unknown
   howToApply: string | null
+  tips: string[]
+  // Spanish translations
+  nameEs: string | null
+  descriptionEs: string | null
+  howToApplyEs: string | null
+  tipsEs: string[]
   source: string
   sourceId: string | null
   verifiedAt: Date | null

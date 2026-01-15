@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
+import { LanguageProvider } from '@/components/LanguageContext'
 
 export const metadata: Metadata = {
   title: 'New Haven Navigator',
@@ -22,9 +23,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen">
-        <main className="max-w-lg mx-auto">
-          {children}
-        </main>
+        <LanguageProvider>
+          <main className="max-w-lg mx-auto">
+            {children}
+          </main>
+        </LanguageProvider>
       </body>
     </html>
   )

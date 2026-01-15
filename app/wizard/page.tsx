@@ -2,13 +2,10 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import {
-  CATEGORIES,
-  HOUSING_STATUSES,
-  INSURANCE_STATUSES,
-  SPECIAL_POPULATIONS,
-  NEW_HAVEN_ZIPS
-} from '@/lib/constants'
+import Link from 'next/link'
+import { useLanguage } from '@/components/LanguageContext'
+import LanguageToggle from '@/components/LanguageToggle'
+import { NEW_HAVEN_ZIPS } from '@/lib/constants'
 
 interface WizardData {
   zipCode: string
@@ -20,20 +17,161 @@ interface WizardData {
   categoriesNeeded: string[]
 }
 
-const STEPS = [
-  'location',
-  'household',
-  'income',
-  'housing',
-  'insurance',
-  'situations',
-  'needs'
-] as const
-
+const STEPS = ['location', 'household', 'income', 'housing', 'insurance', 'situations', 'needs'] as const
 type Step = typeof STEPS[number]
+
+const content = {
+  en: {
+    // Headers
+    step: 'Step',
+    of: 'of',
+    continue: 'Continue',
+    seeResults: 'See My Resources',
+    skip: 'Skip this step',
+
+    // Location
+    locationTitle: "What's your zip code?",
+    locationSubtitle: "We'll show resources near you",
+    locationWarning: "This zip code is outside New Haven. Some resources may not apply.",
+
+    // Household
+    householdTitle: 'How many people in your household?',
+    householdSubtitle: 'Include yourself, spouse, and dependents',
+
+    // Income
+    incomeTitle: "What's your monthly household income?",
+    incomeSubtitle: 'Before taxes, include all sources',
+    perYear: '/year',
+
+    // Housing
+    housingTitle: "What's your housing situation?",
+    housingSubtitle: 'This helps us find the right resources',
+    housingOptions: [
+      { value: 'housed', label: 'I have stable housing' },
+      { value: 'at_risk', label: 'At risk of losing housing' },
+      { value: 'homeless', label: 'Currently homeless or in shelter' },
+    ],
+
+    // Insurance
+    insuranceTitle: 'What health insurance do you have?',
+    insuranceSubtitle: 'Select your primary coverage',
+    insuranceOptions: [
+      { value: 'uninsured', label: 'No insurance' },
+      { value: 'medicaid', label: 'Medicaid / HUSKY' },
+      { value: 'medicare', label: 'Medicare' },
+      { value: 'private', label: 'Private insurance' },
+    ],
+
+    // Situations
+    situationsTitle: 'Do any of these apply to you?',
+    situationsSubtitle: 'Select all that apply (optional)',
+    situationOptions: [
+      { value: 'veteran', label: 'Veteran' },
+      { value: 'formerly_incarcerated', label: 'Recently released from incarceration' },
+      { value: 'pregnant', label: 'Pregnant' },
+      { value: 'children', label: 'Have children under 18' },
+      { value: 'senior', label: 'Senior (60+)' },
+      { value: 'disabled', label: 'Have a disability' },
+      { value: 'domestic_violence', label: 'Experiencing domestic violence' },
+    ],
+
+    // Needs
+    needsTitle: 'What kind of help do you need?',
+    needsSubtitle: 'Select all that apply',
+    needsOptions: [
+      { slug: 'housing', name: 'Housing', icon: '🏠' },
+      { slug: 'food', name: 'Food', icon: '🍎' },
+      { slug: 'cash', name: 'Cash', icon: '💵' },
+      { slug: 'harm-reduction', name: 'Harm Reduction', icon: '💊' },
+      { slug: 'healthcare', name: 'Healthcare', icon: '🏥' },
+      { slug: 'mental-health', name: 'Mental Health', icon: '🧠' },
+      { slug: 'employment', name: 'Jobs', icon: '💼' },
+      { slug: 'childcare', name: 'Childcare', icon: '👶' },
+      { slug: 'legal', name: 'Legal Aid', icon: '⚖️' },
+      { slug: 'transportation', name: 'Transportation', icon: '🚌' },
+      { slug: 'utilities', name: 'Utilities', icon: '💡' },
+      { slug: 'immigration', name: 'Immigration', icon: '📄' },
+    ],
+  },
+  es: {
+    // Headers
+    step: 'Paso',
+    of: 'de',
+    continue: 'Continuar',
+    seeResults: 'Ver Mis Recursos',
+    skip: 'Saltar este paso',
+
+    // Location
+    locationTitle: '¿Cuál es su código postal?',
+    locationSubtitle: 'Le mostraremos recursos cerca de usted',
+    locationWarning: 'Este código postal está fuera de New Haven. Algunos recursos pueden no aplicar.',
+
+    // Household
+    householdTitle: '¿Cuántas personas hay en su hogar?',
+    householdSubtitle: 'Inclúyase a usted mismo, cónyuge y dependientes',
+
+    // Income
+    incomeTitle: '¿Cuál es el ingreso mensual de su hogar?',
+    incomeSubtitle: 'Antes de impuestos, incluya todas las fuentes',
+    perYear: '/año',
+
+    // Housing
+    housingTitle: '¿Cuál es su situación de vivienda?',
+    housingSubtitle: 'Esto nos ayuda a encontrar los recursos correctos',
+    housingOptions: [
+      { value: 'housed', label: 'Tengo vivienda estable' },
+      { value: 'at_risk', label: 'En riesgo de perder vivienda' },
+      { value: 'homeless', label: 'Sin hogar o en refugio actualmente' },
+    ],
+
+    // Insurance
+    insuranceTitle: '¿Qué seguro médico tiene?',
+    insuranceSubtitle: 'Seleccione su cobertura principal',
+    insuranceOptions: [
+      { value: 'uninsured', label: 'Sin seguro' },
+      { value: 'medicaid', label: 'Medicaid / HUSKY' },
+      { value: 'medicare', label: 'Medicare' },
+      { value: 'private', label: 'Seguro privado' },
+    ],
+
+    // Situations
+    situationsTitle: '¿Alguna de estas situaciones le aplica?',
+    situationsSubtitle: 'Seleccione todas las que apliquen (opcional)',
+    situationOptions: [
+      { value: 'veteran', label: 'Veterano' },
+      { value: 'formerly_incarcerated', label: 'Recientemente liberado de la cárcel' },
+      { value: 'pregnant', label: 'Embarazada' },
+      { value: 'children', label: 'Tiene hijos menores de 18 años' },
+      { value: 'senior', label: 'Persona mayor (60+)' },
+      { value: 'disabled', label: 'Tiene una discapacidad' },
+      { value: 'domestic_violence', label: 'Experiencia de violencia doméstica' },
+    ],
+
+    // Needs
+    needsTitle: '¿Qué tipo de ayuda necesita?',
+    needsSubtitle: 'Seleccione todas las que apliquen',
+    needsOptions: [
+      { slug: 'housing', name: 'Vivienda', icon: '🏠' },
+      { slug: 'food', name: 'Comida', icon: '🍎' },
+      { slug: 'cash', name: 'Efectivo', icon: '💵' },
+      { slug: 'harm-reduction', name: 'Reducción de Daños', icon: '💊' },
+      { slug: 'healthcare', name: 'Salud', icon: '🏥' },
+      { slug: 'mental-health', name: 'Salud Mental', icon: '🧠' },
+      { slug: 'employment', name: 'Empleo', icon: '💼' },
+      { slug: 'childcare', name: 'Cuidado Infantil', icon: '👶' },
+      { slug: 'legal', name: 'Ayuda Legal', icon: '⚖️' },
+      { slug: 'transportation', name: 'Transporte', icon: '🚌' },
+      { slug: 'utilities', name: 'Servicios', icon: '💡' },
+      { slug: 'immigration', name: 'Inmigración', icon: '📄' },
+    ],
+  }
+}
 
 export default function WizardPage() {
   const router = useRouter()
+  const { language } = useLanguage()
+  const t = content[language]
+
   const [currentStep, setCurrentStep] = useState<Step>('location')
   const [data, setData] = useState<WizardData>({
     zipCode: '',
@@ -53,7 +191,6 @@ export default function WizardPage() {
     if (nextIndex < STEPS.length) {
       setCurrentStep(STEPS[nextIndex])
     } else {
-      // Submit and redirect to results
       const params = new URLSearchParams()
       params.set('zip', data.zipCode)
       params.set('household', data.householdSize.toString())
@@ -62,7 +199,6 @@ export default function WizardPage() {
       params.set('insurance', data.insuranceStatus)
       if (data.populations.length) params.set('populations', data.populations.join(','))
       if (data.categoriesNeeded.length) params.set('categories', data.categoriesNeeded.join(','))
-
       router.push(`/results?${params.toString()}`)
     }
   }
@@ -78,22 +214,14 @@ export default function WizardPage() {
 
   const canProceed = (): boolean => {
     switch (currentStep) {
-      case 'location':
-        return data.zipCode.length === 5
-      case 'household':
-        return data.householdSize >= 1
-      case 'income':
-        return true // 0 is valid
-      case 'housing':
-        return data.housingStatus !== ''
-      case 'insurance':
-        return data.insuranceStatus !== ''
-      case 'situations':
-        return true // Optional
-      case 'needs':
-        return data.categoriesNeeded.length > 0
-      default:
-        return false
+      case 'location': return data.zipCode.length === 5
+      case 'household': return data.householdSize >= 1
+      case 'income': return true
+      case 'housing': return data.housingStatus !== ''
+      case 'insurance': return data.insuranceStatus !== ''
+      case 'situations': return true
+      case 'needs': return data.categoriesNeeded.length > 0
+      default: return false
     }
   }
 
@@ -109,28 +237,29 @@ export default function WizardPage() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Progress bar */}
-      <div className="h-1 bg-gray-200">
-        <div
-          className="h-full bg-primary-600 transition-all duration-300"
-          style={{ width: `${progress}%` }}
-        />
+      <div className="progress-bar">
+        <div className="progress-bar-fill" style={{ width: `${progress}%` }} />
       </div>
 
       {/* Header */}
-      <div className="px-4 py-4 border-b border-gray-200">
-        <button onClick={goBack} className="text-gray-600 hover:text-gray-900">
+      <header className="px-5 py-4 flex items-center justify-between border-b border-[hsl(var(--color-border))]">
+        <button onClick={goBack} className="p-1 -ml-1 text-gray-500 hover:text-gray-900 transition-colors">
           <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-      </div>
+        <span className="text-sm text-gray-500 font-medium">
+          {t.step} {stepIndex + 1} {t.of} {STEPS.length}
+        </span>
+        <LanguageToggle />
+      </header>
 
       {/* Content */}
-      <div className="flex-1 px-4 py-6">
+      <main className="flex-1 px-5 py-8 fade-in">
         {currentStep === 'location' && (
           <div>
-            <h2 className="text-xl font-semibold mb-2">What's your zip code?</h2>
-            <p className="text-gray-600 mb-6">We'll show resources near you</p>
+            <h2 className="text-2xl font-semibold mb-2">{t.locationTitle}</h2>
+            <p className="text-gray-500 mb-8">{t.locationSubtitle}</p>
             <input
               type="text"
               inputMode="numeric"
@@ -139,11 +268,11 @@ export default function WizardPage() {
               placeholder="06511"
               value={data.zipCode}
               onChange={(e) => setData({ ...data, zipCode: e.target.value.replace(/\D/g, '') })}
-              className="input text-2xl text-center"
+              className="input text-3xl text-center font-semibold tracking-widest"
             />
             {data.zipCode.length === 5 && !NEW_HAVEN_ZIPS.includes(data.zipCode) && (
-              <p className="mt-3 text-amber-600 text-sm">
-                This zip code is outside the New Haven area. Some resources may not apply.
+              <p className="mt-4 text-amber-600 text-sm bg-amber-50 p-3 rounded-lg">
+                {t.locationWarning}
               </p>
             )}
           </div>
@@ -151,19 +280,19 @@ export default function WizardPage() {
 
         {currentStep === 'household' && (
           <div>
-            <h2 className="text-xl font-semibold mb-2">How many people in your household?</h2>
-            <p className="text-gray-600 mb-6">Include yourself, spouse, and dependents</p>
+            <h2 className="text-2xl font-semibold mb-2">{t.householdTitle}</h2>
+            <p className="text-gray-500 mb-8">{t.householdSubtitle}</p>
             <div className="flex items-center justify-center gap-6">
               <button
                 onClick={() => setData({ ...data, householdSize: Math.max(1, data.householdSize - 1) })}
-                className="w-14 h-14 rounded-full bg-gray-200 text-2xl font-bold hover:bg-gray-300"
+                className="w-14 h-14 rounded-full bg-[hsl(var(--color-border))] text-2xl font-bold hover:bg-gray-200 transition-colors"
               >
                 −
               </button>
-              <span className="text-5xl font-bold w-16 text-center">{data.householdSize}</span>
+              <span className="text-6xl font-bold w-20 text-center">{data.householdSize}</span>
               <button
                 onClick={() => setData({ ...data, householdSize: data.householdSize + 1 })}
-                className="w-14 h-14 rounded-full bg-gray-200 text-2xl font-bold hover:bg-gray-300"
+                className="w-14 h-14 rounded-full bg-[hsl(var(--color-border))] text-2xl font-bold hover:bg-gray-200 transition-colors"
               >
                 +
               </button>
@@ -173,10 +302,10 @@ export default function WizardPage() {
 
         {currentStep === 'income' && (
           <div>
-            <h2 className="text-xl font-semibold mb-2">What's your monthly household income?</h2>
-            <p className="text-gray-600 mb-6">Before taxes, include all sources</p>
+            <h2 className="text-2xl font-semibold mb-2">{t.incomeTitle}</h2>
+            <p className="text-gray-500 mb-8">{t.incomeSubtitle}</p>
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl text-gray-400">$</span>
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-3xl text-gray-400 font-semibold">$</span>
               <input
                 type="text"
                 inputMode="numeric"
@@ -186,31 +315,34 @@ export default function WizardPage() {
                   const val = e.target.value.replace(/\D/g, '')
                   setData({ ...data, monthlyIncome: parseInt(val) || 0 })
                 }}
-                className="input text-2xl pl-10"
+                className="input text-3xl pl-12 font-semibold"
               />
             </div>
-            <p className="mt-3 text-gray-500 text-sm">
-              ${(data.monthlyIncome * 12).toLocaleString()}/year
+            <p className="mt-4 text-gray-500 text-center">
+              ${(data.monthlyIncome * 12).toLocaleString()}{t.perYear}
             </p>
           </div>
         )}
 
         {currentStep === 'housing' && (
           <div>
-            <h2 className="text-xl font-semibold mb-2">What's your housing situation?</h2>
-            <p className="text-gray-600 mb-6">This helps us find the right resources</p>
+            <h2 className="text-2xl font-semibold mb-2">{t.housingTitle}</h2>
+            <p className="text-gray-500 mb-8">{t.housingSubtitle}</p>
             <div className="space-y-3">
-              {HOUSING_STATUSES.map((status) => (
+              {t.housingOptions.map((option) => (
                 <button
-                  key={status.value}
-                  onClick={() => setData({ ...data, housingStatus: status.value })}
-                  className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
-                    data.housingStatus === status.value
-                      ? 'border-primary-600 bg-primary-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
+                  key={option.value}
+                  onClick={() => setData({ ...data, housingStatus: option.value })}
+                  className={`selection-btn ${data.housingStatus === option.value ? 'selected' : ''}`}
                 >
-                  {status.label}
+                  <span className="flex items-center justify-between">
+                    <span className="font-medium">{option.label}</span>
+                    {data.housingStatus === option.value && (
+                      <svg className="w-5 h-5 text-[hsl(var(--color-primary))]" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                  </span>
                 </button>
               ))}
             </div>
@@ -219,20 +351,23 @@ export default function WizardPage() {
 
         {currentStep === 'insurance' && (
           <div>
-            <h2 className="text-xl font-semibold mb-2">What health insurance do you have?</h2>
-            <p className="text-gray-600 mb-6">Select your primary coverage</p>
+            <h2 className="text-2xl font-semibold mb-2">{t.insuranceTitle}</h2>
+            <p className="text-gray-500 mb-8">{t.insuranceSubtitle}</p>
             <div className="space-y-3">
-              {INSURANCE_STATUSES.map((status) => (
+              {t.insuranceOptions.map((option) => (
                 <button
-                  key={status.value}
-                  onClick={() => setData({ ...data, insuranceStatus: status.value })}
-                  className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
-                    data.insuranceStatus === status.value
-                      ? 'border-primary-600 bg-primary-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
+                  key={option.value}
+                  onClick={() => setData({ ...data, insuranceStatus: option.value })}
+                  className={`selection-btn ${data.insuranceStatus === option.value ? 'selected' : ''}`}
                 >
-                  {status.label}
+                  <span className="flex items-center justify-between">
+                    <span className="font-medium">{option.label}</span>
+                    {data.insuranceStatus === option.value && (
+                      <svg className="w-5 h-5 text-[hsl(var(--color-primary))]" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                  </span>
                 </button>
               ))}
             </div>
@@ -241,23 +376,19 @@ export default function WizardPage() {
 
         {currentStep === 'situations' && (
           <div>
-            <h2 className="text-xl font-semibold mb-2">Do any of these apply to you?</h2>
-            <p className="text-gray-600 mb-6">Select all that apply (optional)</p>
+            <h2 className="text-2xl font-semibold mb-2">{t.situationsTitle}</h2>
+            <p className="text-gray-500 mb-8">{t.situationsSubtitle}</p>
             <div className="space-y-3">
-              {SPECIAL_POPULATIONS.map((pop) => (
+              {t.situationOptions.map((option) => (
                 <button
-                  key={pop.value}
-                  onClick={() => toggleArrayValue('populations', pop.value)}
-                  className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
-                    data.populations.includes(pop.value)
-                      ? 'border-primary-600 bg-primary-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
+                  key={option.value}
+                  onClick={() => toggleArrayValue('populations', option.value)}
+                  className={`selection-btn ${data.populations.includes(option.value) ? 'selected' : ''}`}
                 >
                   <span className="flex items-center justify-between">
-                    {pop.label}
-                    {data.populations.includes(pop.value) && (
-                      <svg className="w-5 h-5 text-primary-600" fill="currentColor" viewBox="0 0 20 20">
+                    <span className="font-medium">{option.label}</span>
+                    {data.populations.includes(option.value) && (
+                      <svg className="w-5 h-5 text-[hsl(var(--color-primary))]" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
                     )}
@@ -270,18 +401,14 @@ export default function WizardPage() {
 
         {currentStep === 'needs' && (
           <div>
-            <h2 className="text-xl font-semibold mb-2">What kind of help do you need?</h2>
-            <p className="text-gray-600 mb-6">Select all that apply</p>
+            <h2 className="text-2xl font-semibold mb-2">{t.needsTitle}</h2>
+            <p className="text-gray-500 mb-8">{t.needsSubtitle}</p>
             <div className="grid grid-cols-2 gap-3">
-              {CATEGORIES.map((cat) => (
+              {t.needsOptions.map((cat) => (
                 <button
                   key={cat.slug}
                   onClick={() => toggleArrayValue('categoriesNeeded', cat.slug)}
-                  className={`p-4 rounded-xl border-2 text-left transition-all ${
-                    data.categoriesNeeded.includes(cat.slug)
-                      ? 'border-primary-600 bg-primary-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
+                  className={`selection-btn text-center ${data.categoriesNeeded.includes(cat.slug) ? 'selected' : ''}`}
                 >
                   <div className="text-2xl mb-1">{cat.icon}</div>
                   <div className="font-medium text-sm">{cat.name}</div>
@@ -290,26 +417,23 @@ export default function WizardPage() {
             </div>
           </div>
         )}
-      </div>
+      </main>
 
       {/* Footer */}
-      <div className="px-4 py-4 border-t border-gray-200">
+      <footer className="px-5 py-4 border-t border-[hsl(var(--color-border))] bg-white">
         <button
           onClick={goNext}
           disabled={!canProceed()}
           className="btn-primary w-full"
         >
-          {stepIndex === STEPS.length - 1 ? 'See My Resources' : 'Continue'}
+          {stepIndex === STEPS.length - 1 ? t.seeResults : t.continue}
         </button>
         {currentStep === 'situations' && (
-          <button
-            onClick={goNext}
-            className="w-full mt-2 text-gray-600 py-2"
-          >
-            Skip this step
+          <button onClick={goNext} className="w-full mt-3 text-gray-500 py-2 text-sm font-medium hover:text-gray-700">
+            {t.skip}
           </button>
         )}
-      </div>
+      </footer>
     </div>
   )
 }

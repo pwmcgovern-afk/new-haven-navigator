@@ -2,37 +2,252 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Modern Design System - Inspired by Abridge */
+
 @layer base {
+  :root {
+    /* Refined color palette */
+    --color-primary: 15 90 60; /* Warm teal-green */
+    --color-accent: 24 90 45; /* Burnt orange for CTAs */
+    --color-bg: 30 15 98; /* Warm off-white */
+    --color-surface: 0 0 100; /* Pure white */
+    --color-text: 220 20 20; /* Near black with warmth */
+    --color-text-secondary: 220 10 45;
+    --color-border: 220 10 90;
+  }
+
   html {
     -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
   }
 
   body {
-    @apply bg-gray-50 text-gray-900 antialiased;
+    @apply antialiased;
+    background: hsl(var(--color-bg));
+    color: hsl(var(--color-text));
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  /* Typography refinements */
+  h1, h2, h3, h4 {
+    @apply tracking-tight;
+    letter-spacing: -0.02em;
+  }
+
+  h1 {
+    @apply text-3xl font-semibold leading-tight;
+  }
+
+  h2 {
+    @apply text-xl font-semibold;
+  }
+
+  p {
+    @apply leading-relaxed;
   }
 }
 
 @layer components {
+  /* Primary button - solid accent */
   .btn-primary {
-    @apply bg-primary-600 text-white font-medium px-6 py-3 rounded-xl
-           hover:bg-primary-700 active:bg-primary-800
-           transition-colors duration-150
-           disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply font-medium px-6 py-3.5 rounded-full
+           transition-all duration-200 ease-out
+           disabled:opacity-40 disabled:cursor-not-allowed
+           shadow-sm hover:shadow-md active:scale-[0.98];
+    background: hsl(var(--color-accent));
+    color: white;
   }
 
+  .btn-primary:hover:not(:disabled) {
+    background: hsl(24 90 40);
+  }
+
+  /* Secondary button - outlined */
   .btn-secondary {
-    @apply bg-white text-gray-700 font-medium px-6 py-3 rounded-xl
-           border border-gray-300 hover:bg-gray-50 active:bg-gray-100
-           transition-colors duration-150;
+    @apply font-medium px-6 py-3.5 rounded-full
+           border-2 transition-all duration-200 ease-out
+           hover:shadow-sm active:scale-[0.98];
+    background: hsl(var(--color-surface));
+    border-color: hsl(var(--color-border));
+    color: hsl(var(--color-text));
   }
 
+  .btn-secondary:hover {
+    border-color: hsl(220 10 80);
+    background: hsl(220 10 98);
+  }
+
+  /* Cards - clean with subtle depth */
   .card {
-    @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-4;
+    @apply rounded-2xl p-5 transition-all duration-200;
+    background: hsl(var(--color-surface));
+    border: 1px solid hsl(var(--color-border));
   }
 
+  .card:hover {
+    @apply shadow-lg;
+    border-color: hsl(220 10 85);
+    transform: translateY(-2px);
+  }
+
+  .card-flat {
+    @apply rounded-2xl p-5;
+    background: hsl(var(--color-surface));
+    border: 1px solid hsl(var(--color-border));
+  }
+
+  /* Input fields */
   .input {
-    @apply w-full px-4 py-3 rounded-xl border border-gray-300
-           focus:border-primary-500 focus:ring-2 focus:ring-primary-200
-           outline-none transition-all duration-150;
+    @apply w-full px-4 py-3.5 rounded-xl
+           outline-none transition-all duration-200;
+    background: hsl(var(--color-surface));
+    border: 2px solid hsl(var(--color-border));
+    color: hsl(var(--color-text));
+  }
+
+  .input:focus {
+    border-color: hsl(var(--color-primary));
+    box-shadow: 0 0 0 4px hsla(var(--color-primary) / 0.1);
+  }
+
+  .input::placeholder {
+    color: hsl(var(--color-text-secondary));
+    opacity: 0.6;
+  }
+
+  /* Selection button (for wizard options) */
+  .selection-btn {
+    @apply w-full p-4 rounded-xl text-left transition-all duration-200;
+    background: hsl(var(--color-surface));
+    border: 2px solid hsl(var(--color-border));
+  }
+
+  .selection-btn:hover {
+    border-color: hsl(220 10 80);
+    background: hsl(220 10 98);
+  }
+
+  .selection-btn.selected {
+    border-color: hsl(var(--color-primary));
+    background: hsla(var(--color-primary) / 0.05);
+  }
+
+  /* Category pills */
+  .category-pill {
+    @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium
+           transition-all duration-200;
+    background: hsl(220 10 95);
+    color: hsl(var(--color-text-secondary));
+  }
+
+  .category-pill:hover {
+    background: hsl(220 10 90);
+  }
+
+  .category-pill.active {
+    background: hsl(var(--color-primary));
+    color: white;
+  }
+
+  /* Info cards */
+  .info-card {
+    @apply rounded-xl p-4;
+  }
+
+  .info-card.success {
+    background: hsl(145 60 95);
+    border: 1px solid hsl(145 60 85);
+  }
+
+  .info-card.success h2, .info-card.success p {
+    color: hsl(145 60 25);
+  }
+
+  .info-card.info {
+    background: hsl(210 60 95);
+    border: 1px solid hsl(210 60 85);
+  }
+
+  .info-card.info h2, .info-card.info p {
+    color: hsl(210 60 25);
+  }
+
+  /* Hero card */
+  .hero-card {
+    @apply rounded-3xl p-8 text-center transition-all duration-300;
+    background: linear-gradient(135deg, hsl(var(--color-primary)) 0%, hsl(15 80 45) 100%);
+    color: white;
+  }
+
+  .hero-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px -10px hsla(var(--color-primary) / 0.4);
+  }
+
+  /* Progress bar */
+  .progress-bar {
+    @apply h-1 rounded-full overflow-hidden;
+    background: hsl(var(--color-border));
+  }
+
+  .progress-bar-fill {
+    @apply h-full rounded-full transition-all duration-500 ease-out;
+    background: hsl(var(--color-primary));
+  }
+
+  /* Language toggle */
+  .lang-toggle {
+    @apply inline-flex items-center p-1 rounded-full;
+    background: hsl(220 10 95);
+  }
+
+  .lang-toggle button {
+    @apply px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200;
+  }
+
+  .lang-toggle button.active {
+    background: hsl(var(--color-surface));
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  .lang-toggle button:not(.active) {
+    color: hsl(var(--color-text-secondary));
+  }
+
+  .lang-toggle button:not(.active):hover {
+    color: hsl(var(--color-text));
+  }
+}
+
+/* Smooth page transitions */
+@layer utilities {
+  .fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .slide-up {
+    animation: slideUp 0.4s ease-out;
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
