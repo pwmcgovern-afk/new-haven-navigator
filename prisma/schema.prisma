@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Resource {
+  id          String   @id @default(uuid())
+  name        String
+  organization String?
+  description String
+
+  // Categories (stored as array)
+  categories  String[]
+
+  // Location
+  address     String?
+  city        String   @default("New Haven")
+  state       String   @default("CT")
+  zip         String?
+  latitude    Float?
+  longitude   Float?
+
+  // Contact
+  phone       String?
+  website     String?
+  email       String?
+  hours       String?
+
+  // Eligibility criteria (JSON for flexibility)
+  eligibility Json?
+  // Structure:
+  // {
+  //   incomeLimitPctFpl: number | null,  // e.g., 200 = 200% FPL
+  //   housingStatus: string[],           // ["homeless", "at_risk", "housed"]
+  //   populations: string[],             // ["veteran", "formerly_incarcerated", "pregnant", etc.]
+  //   insuranceRequired: boolean | null,
+  //   documentsRequired: string[],
+  //   ageMin: number | null,
+  //   ageMax: number | null,
+  //   residencyRequired: boolean,
+  //   citizenshipRequired: boolean
+  // }
+
+  // Application info
+  howToApply  String?
+
+  // Data source tracking
+  source      String   @default("manual") // "manual", "211", "findhelp"
+  sourceId    String?
+
+  // Timestamps
+  verifiedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([categories])
+  @@index([city])
+  @@index([source])
+}
+
+model Category {
+  id           String @id @default(uuid())
+  name         String
+  slug         String @unique
+  description  String?
+  icon         String?
+  displayOrder Int    @default(0)
+}
