@@ -28,6 +28,8 @@ const content = {
     continue: 'Continue',
     seeResults: 'See My Resources',
     skip: 'Skip this step',
+    goBack: 'Go back to previous step',
+    progressLabel: 'Wizard progress',
 
     // Location
     locationTitle: "What's your zip code?",
@@ -100,6 +102,8 @@ const content = {
     continue: 'Continuar',
     seeResults: 'Ver Mis Recursos',
     skip: 'Saltar este paso',
+    goBack: 'Volver al paso anterior',
+    progressLabel: 'Progreso del asistente',
 
     // Location
     locationTitle: '¿Cuál es su código postal?',
@@ -236,31 +240,49 @@ export default function WizardPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Progress bar */}
-      <div className="progress-bar">
+      {/* Progress bar with accessibility */}
+      <div
+        className="progress-bar"
+        role="progressbar"
+        aria-valuenow={stepIndex + 1}
+        aria-valuemin={1}
+        aria-valuemax={STEPS.length}
+        aria-label={t.progressLabel}
+      >
         <div className="progress-bar-fill" style={{ width: `${progress}%` }} />
+      </div>
+      {/* Screen reader announcement */}
+      <div className="sr-only" aria-live="polite">
+        {t.step} {stepIndex + 1} {t.of} {STEPS.length}
       </div>
 
       {/* Header */}
-      <header className="px-5 py-4 flex items-center justify-between border-b border-[hsl(var(--color-border))]">
-        <button onClick={goBack} className="p-1 -ml-1 text-gray-500 hover:text-gray-900 transition-colors">
-          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <header className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: '2px solid var(--color-border)' }} role="banner">
+        <button
+          onClick={goBack}
+          className="p-2 -ml-2 rounded-lg"
+          style={{ color: 'var(--color-text-secondary)' }}
+          aria-label={t.goBack}
+        >
+          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <span className="text-sm text-gray-500 font-medium">
+        <span className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>
           {t.step} {stepIndex + 1} {t.of} {STEPS.length}
         </span>
         <LanguageToggle />
       </header>
 
       {/* Content */}
-      <main className="flex-1 px-5 py-8 fade-in">
+      <main className="flex-1 px-5 py-8 fade-in" role="main" id="main-content">
         {currentStep === 'location' && (
-          <div>
-            <h2 className="text-2xl font-semibold mb-2">{t.locationTitle}</h2>
-            <p className="text-gray-500 mb-8">{t.locationSubtitle}</p>
+          <section aria-labelledby="location-title">
+            <h2 id="location-title" className="text-2xl font-semibold mb-2">{t.locationTitle}</h2>
+            <p className="mb-8" style={{ color: 'var(--color-text-secondary)' }}>{t.locationSubtitle}</p>
+            <label htmlFor="zip-input" className="sr-only">{t.locationTitle}</label>
             <input
+              id="zip-input"
               type="text"
               inputMode="numeric"
               pattern="[0-9]*"
@@ -269,44 +291,57 @@ export default function WizardPage() {
               value={data.zipCode}
               onChange={(e) => setData({ ...data, zipCode: e.target.value.replace(/\D/g, '') })}
               className="input text-3xl text-center font-semibold tracking-widest"
+              aria-describedby={data.zipCode.length === 5 && !NEW_HAVEN_ZIPS.includes(data.zipCode) ? 'zip-warning' : undefined}
             />
             {data.zipCode.length === 5 && !NEW_HAVEN_ZIPS.includes(data.zipCode) && (
-              <p className="mt-4 text-amber-600 text-sm bg-amber-50 p-3 rounded-lg">
-                {t.locationWarning}
-              </p>
+              <div id="zip-warning" className="info-card warning mt-4" role="alert">
+                <p className="text-sm">{t.locationWarning}</p>
+              </div>
             )}
-          </div>
+          </section>
         )}
 
         {currentStep === 'household' && (
-          <div>
-            <h2 className="text-2xl font-semibold mb-2">{t.householdTitle}</h2>
-            <p className="text-gray-500 mb-8">{t.householdSubtitle}</p>
-            <div className="flex items-center justify-center gap-6">
+          <section aria-labelledby="household-title">
+            <h2 id="household-title" className="text-2xl font-semibold mb-2">{t.householdTitle}</h2>
+            <p className="mb-8" style={{ color: 'var(--color-text-secondary)' }}>{t.householdSubtitle}</p>
+            <div className="flex items-center justify-center gap-6" role="group" aria-label={t.householdTitle}>
               <button
                 onClick={() => setData({ ...data, householdSize: Math.max(1, data.householdSize - 1) })}
-                className="w-14 h-14 rounded-full bg-[hsl(var(--color-border))] text-2xl font-bold hover:bg-gray-200 transition-colors"
+                className="w-14 h-14 rounded-full text-2xl font-bold transition-colors"
+                style={{ background: 'var(--color-border)' }}
+                aria-label={language === 'en' ? 'Decrease household size' : 'Disminuir tamaño del hogar'}
               >
                 −
               </button>
-              <span className="text-6xl font-bold w-20 text-center">{data.householdSize}</span>
+              <span
+                className="text-6xl font-bold w-20 text-center"
+                aria-live="polite"
+                aria-atomic="true"
+              >
+                {data.householdSize}
+              </span>
               <button
                 onClick={() => setData({ ...data, householdSize: data.householdSize + 1 })}
-                className="w-14 h-14 rounded-full bg-[hsl(var(--color-border))] text-2xl font-bold hover:bg-gray-200 transition-colors"
+                className="w-14 h-14 rounded-full text-2xl font-bold transition-colors"
+                style={{ background: 'var(--color-border)' }}
+                aria-label={language === 'en' ? 'Increase household size' : 'Aumentar tamaño del hogar'}
               >
                 +
               </button>
             </div>
-          </div>
+          </section>
         )}
 
         {currentStep === 'income' && (
-          <div>
-            <h2 className="text-2xl font-semibold mb-2">{t.incomeTitle}</h2>
-            <p className="text-gray-500 mb-8">{t.incomeSubtitle}</p>
+          <section aria-labelledby="income-title">
+            <h2 id="income-title" className="text-2xl font-semibold mb-2">{t.incomeTitle}</h2>
+            <p className="mb-8" style={{ color: 'var(--color-text-secondary)' }}>{t.incomeSubtitle}</p>
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-3xl text-gray-400 font-semibold">$</span>
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-3xl font-semibold" style={{ color: 'var(--color-text-muted)' }} aria-hidden="true">$</span>
+              <label htmlFor="income-input" className="sr-only">{t.incomeTitle}</label>
               <input
+                id="income-input"
                 type="text"
                 inputMode="numeric"
                 placeholder="0"
@@ -316,120 +351,131 @@ export default function WizardPage() {
                   setData({ ...data, monthlyIncome: parseInt(val) || 0 })
                 }}
                 className="input text-3xl pl-12 font-semibold"
+                aria-describedby="income-yearly"
               />
             </div>
-            <p className="mt-4 text-gray-500 text-center">
+            <p id="income-yearly" className="mt-4 text-center" style={{ color: 'var(--color-text-secondary)' }}>
               ${(data.monthlyIncome * 12).toLocaleString()}{t.perYear}
             </p>
-          </div>
+          </section>
         )}
 
         {currentStep === 'housing' && (
-          <div>
-            <h2 className="text-2xl font-semibold mb-2">{t.housingTitle}</h2>
-            <p className="text-gray-500 mb-8">{t.housingSubtitle}</p>
-            <div className="space-y-3">
-              {t.housingOptions.map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => setData({ ...data, housingStatus: option.value })}
-                  className={`selection-btn ${data.housingStatus === option.value ? 'selected' : ''}`}
-                >
-                  <span className="flex items-center justify-between">
-                    <span className="font-medium">{option.label}</span>
-                    {data.housingStatus === option.value && (
-                      <svg className="w-5 h-5 text-[hsl(var(--color-primary))]" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    )}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
+          <section aria-labelledby="housing-title">
+            <h2 id="housing-title" className="text-2xl font-semibold mb-2">{t.housingTitle}</h2>
+            <p className="mb-8" style={{ color: 'var(--color-text-secondary)' }}>{t.housingSubtitle}</p>
+            <fieldset>
+              <legend className="sr-only">{t.housingTitle}</legend>
+              <div className="space-y-3" role="radiogroup" aria-label={t.housingTitle}>
+                {t.housingOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => setData({ ...data, housingStatus: option.value })}
+                    className={`selection-btn ${data.housingStatus === option.value ? 'selected' : ''}`}
+                    role="radio"
+                    aria-checked={data.housingStatus === option.value}
+                  >
+                    <span className="flex items-center justify-between">
+                      <span className="font-medium">{option.label}</span>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+          </section>
         )}
 
         {currentStep === 'insurance' && (
-          <div>
-            <h2 className="text-2xl font-semibold mb-2">{t.insuranceTitle}</h2>
-            <p className="text-gray-500 mb-8">{t.insuranceSubtitle}</p>
-            <div className="space-y-3">
-              {t.insuranceOptions.map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => setData({ ...data, insuranceStatus: option.value })}
-                  className={`selection-btn ${data.insuranceStatus === option.value ? 'selected' : ''}`}
-                >
-                  <span className="flex items-center justify-between">
-                    <span className="font-medium">{option.label}</span>
-                    {data.insuranceStatus === option.value && (
-                      <svg className="w-5 h-5 text-[hsl(var(--color-primary))]" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    )}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
+          <section aria-labelledby="insurance-title">
+            <h2 id="insurance-title" className="text-2xl font-semibold mb-2">{t.insuranceTitle}</h2>
+            <p className="mb-8" style={{ color: 'var(--color-text-secondary)' }}>{t.insuranceSubtitle}</p>
+            <fieldset>
+              <legend className="sr-only">{t.insuranceTitle}</legend>
+              <div className="space-y-3" role="radiogroup" aria-label={t.insuranceTitle}>
+                {t.insuranceOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => setData({ ...data, insuranceStatus: option.value })}
+                    className={`selection-btn ${data.insuranceStatus === option.value ? 'selected' : ''}`}
+                    role="radio"
+                    aria-checked={data.insuranceStatus === option.value}
+                  >
+                    <span className="flex items-center justify-between">
+                      <span className="font-medium">{option.label}</span>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+          </section>
         )}
 
         {currentStep === 'situations' && (
-          <div>
-            <h2 className="text-2xl font-semibold mb-2">{t.situationsTitle}</h2>
-            <p className="text-gray-500 mb-8">{t.situationsSubtitle}</p>
-            <div className="space-y-3">
-              {t.situationOptions.map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => toggleArrayValue('populations', option.value)}
-                  className={`selection-btn ${data.populations.includes(option.value) ? 'selected' : ''}`}
-                >
-                  <span className="flex items-center justify-between">
-                    <span className="font-medium">{option.label}</span>
-                    {data.populations.includes(option.value) && (
-                      <svg className="w-5 h-5 text-[hsl(var(--color-primary))]" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    )}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
+          <section aria-labelledby="situations-title">
+            <h2 id="situations-title" className="text-2xl font-semibold mb-2">{t.situationsTitle}</h2>
+            <p className="mb-8" style={{ color: 'var(--color-text-secondary)' }}>{t.situationsSubtitle}</p>
+            <fieldset>
+              <legend className="sr-only">{t.situationsTitle}</legend>
+              <div className="space-y-3" role="group" aria-label={t.situationsTitle}>
+                {t.situationOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => toggleArrayValue('populations', option.value)}
+                    className={`selection-btn ${data.populations.includes(option.value) ? 'selected' : ''}`}
+                    role="checkbox"
+                    aria-checked={data.populations.includes(option.value)}
+                  >
+                    <span className="flex items-center justify-between">
+                      <span className="font-medium">{option.label}</span>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+          </section>
         )}
 
         {currentStep === 'needs' && (
-          <div>
-            <h2 className="text-2xl font-semibold mb-2">{t.needsTitle}</h2>
-            <p className="text-gray-500 mb-8">{t.needsSubtitle}</p>
-            <div className="grid grid-cols-2 gap-3">
-              {t.needsOptions.map((cat) => (
-                <button
-                  key={cat.slug}
-                  onClick={() => toggleArrayValue('categoriesNeeded', cat.slug)}
-                  className={`selection-btn text-center ${data.categoriesNeeded.includes(cat.slug) ? 'selected' : ''}`}
-                >
-                  <div className="text-2xl mb-1">{cat.icon}</div>
-                  <div className="font-medium text-sm">{cat.name}</div>
-                </button>
-              ))}
-            </div>
-          </div>
+          <section aria-labelledby="needs-title">
+            <h2 id="needs-title" className="text-2xl font-semibold mb-2">{t.needsTitle}</h2>
+            <p className="mb-8" style={{ color: 'var(--color-text-secondary)' }}>{t.needsSubtitle}</p>
+            <fieldset>
+              <legend className="sr-only">{t.needsTitle}</legend>
+              <div className="grid grid-cols-2 gap-3" role="group" aria-label={t.needsTitle}>
+                {t.needsOptions.map((cat) => (
+                  <button
+                    key={cat.slug}
+                    onClick={() => toggleArrayValue('categoriesNeeded', cat.slug)}
+                    className={`selection-btn text-center ${data.categoriesNeeded.includes(cat.slug) ? 'selected' : ''}`}
+                    role="checkbox"
+                    aria-checked={data.categoriesNeeded.includes(cat.slug)}
+                  >
+                    <div className="text-2xl mb-1" aria-hidden="true">{cat.icon}</div>
+                    <div className="font-medium text-sm">{cat.name}</div>
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+          </section>
         )}
       </main>
 
       {/* Footer */}
-      <footer className="px-5 py-4 border-t border-[hsl(var(--color-border))] bg-white">
+      <footer className="px-5 py-4" style={{ borderTop: '2px solid var(--color-border)', background: 'var(--color-surface)' }} role="contentinfo">
         <button
           onClick={goNext}
           disabled={!canProceed()}
           className="btn-primary w-full"
+          aria-disabled={!canProceed()}
         >
           {stepIndex === STEPS.length - 1 ? t.seeResults : t.continue}
         </button>
         {currentStep === 'situations' && (
-          <button onClick={goNext} className="w-full mt-3 text-gray-500 py-2 text-sm font-medium hover:text-gray-700">
+          <button
+            onClick={goNext}
+            className="w-full mt-3 py-3 text-sm font-medium btn-touch justify-center"
+            style={{ color: 'var(--color-text-secondary)' }}
+          >
             {t.skip}
           </button>
         )}

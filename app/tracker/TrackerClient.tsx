@@ -24,6 +24,12 @@ const content = {
     save: 'Save',
     cancel: 'Cancel',
     optional: 'Optional',
+    backHome: 'Go back to home page',
+    filterBy: 'Filter by status',
+    editEntry: 'Edit tracking entry',
+    deleteEntry: 'Delete tracking entry',
+    closeModal: 'Close dialog',
+    trackedResources: 'Your tracked resources',
   },
   es: {
     myTracker: 'Mi Seguimiento',
@@ -41,6 +47,12 @@ const content = {
     save: 'Guardar',
     cancel: 'Cancelar',
     optional: 'Opcional',
+    backHome: 'Volver a la página principal',
+    filterBy: 'Filtrar por estado',
+    editEntry: 'Editar entrada de seguimiento',
+    deleteEntry: 'Eliminar entrada de seguimiento',
+    closeModal: 'Cerrar diálogo',
+    trackedResources: 'Tus recursos rastreados',
   }
 }
 
@@ -103,32 +115,37 @@ export default function TrackerClient() {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <header className="sticky top-0 z-10 glass border-b border-white/20 px-5 py-4">
+      <header className="sticky top-0 z-10 glass px-5 py-4" role="banner">
         <div className="flex items-center justify-between">
-          <Link href="/" className="p-2 -ml-2 rounded-xl text-gray-500 hover:text-gray-900 hover:bg-white/50 transition-all duration-300">
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <Link
+            href="/"
+            className="p-2 -ml-2 rounded-xl"
+            style={{ color: 'var(--color-text-secondary)' }}
+            aria-label={t.backHome}
+          >
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </Link>
-          <h1 className="font-bold text-gradient">{t.myTracker}</h1>
+          <h1 className="font-bold" style={{ color: 'var(--color-primary)' }}>{t.myTracker}</h1>
           <LanguageToggle />
         </div>
       </header>
 
-      <main className="px-5 py-6 fade-in">
+      <main className="px-5 py-6 fade-in" role="main" id="main-content">
         {entries.length === 0 ? (
           /* Empty State */
-          <div className="text-center py-16">
-            <div className="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-50 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-              <svg className="w-10 h-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="text-center py-16" role="status">
+            <div className="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6" style={{ background: 'var(--color-bg)' }}>
+              <svg className="w-10 h-10" style={{ color: 'var(--color-text-muted)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
             </div>
-            <h2 className="text-xl font-bold text-gray-900 mb-3">{t.trackerEmpty}</h2>
-            <p className="text-gray-500 mb-8 max-w-xs mx-auto leading-relaxed">{t.trackerEmptySubtitle}</p>
+            <h2 className="text-xl font-bold mb-3">{t.trackerEmpty}</h2>
+            <p className="mb-8 max-w-xs mx-auto leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>{t.trackerEmptySubtitle}</p>
             <Link href="/resources" className="btn-primary inline-flex items-center gap-2">
               {t.browseResources}
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
             </Link>
@@ -136,123 +153,148 @@ export default function TrackerClient() {
         ) : (
           <>
             {/* Filter Pills */}
-            <div className="flex gap-3 overflow-x-auto pb-6 -mx-5 px-5 scrollbar-hide">
-              <button
-                onClick={() => setFilterStatus('all')}
-                className={`category-pill whitespace-nowrap ${filterStatus === 'all' ? 'active' : ''}`}
-              >
-                {t.all} ({entries.length})
-              </button>
-              {(Object.keys(statusConfig) as TrackerStatus[]).map((status) => {
-                const count = entries.filter(e => e.status === status).length
-                if (count === 0) return null
-                return (
-                  <button
-                    key={status}
-                    onClick={() => setFilterStatus(status)}
-                    className={`category-pill whitespace-nowrap ${filterStatus === status ? 'active' : ''}`}
-                  >
-                    {statusConfig[status][language]} ({count})
-                  </button>
-                )
-              })}
-            </div>
+            <nav aria-label={t.filterBy}>
+              <div className="flex gap-3 overflow-x-auto pb-6 -mx-5 px-5 scrollbar-hide" role="list">
+                <button
+                  onClick={() => setFilterStatus('all')}
+                  className={`category-pill whitespace-nowrap ${filterStatus === 'all' ? 'active' : ''}`}
+                  aria-pressed={filterStatus === 'all'}
+                >
+                  {t.all} ({entries.length})
+                </button>
+                {(Object.keys(statusConfig) as TrackerStatus[]).map((status) => {
+                  const count = entries.filter(e => e.status === status).length
+                  if (count === 0) return null
+                  return (
+                    <button
+                      key={status}
+                      onClick={() => setFilterStatus(status)}
+                      className={`category-pill whitespace-nowrap ${filterStatus === status ? 'active' : ''}`}
+                      aria-pressed={filterStatus === status}
+                    >
+                      {statusConfig[status][language]} ({count})
+                    </button>
+                  )
+                })}
+              </div>
+            </nav>
 
             {/* Entries List */}
-            <div className="space-y-4 stagger-children">
+            <section aria-label={t.trackedResources}>
+              <ul className="space-y-4 stagger-children" role="list">
               {filteredEntries.map((entry) => (
-                <div key={entry.id} className="card-flat group">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <Link
-                        href={`/resources/${entry.resourceId}`}
-                        className="font-bold text-lg hover:text-[hsl(var(--color-primary))] transition-colors block truncate"
-                      >
-                        {getResourceName(entry)}
-                      </Link>
-                      {entry.organizationName && entry.organizationName !== entry.resourceName && (
-                        <p className="text-sm text-gray-500 truncate mt-0.5">{entry.organizationName}</p>
+                <li key={entry.id}>
+                  <article className="card-flat group">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <Link
+                          href={`/resources/${entry.resourceId}`}
+                          className="font-bold text-lg block truncate"
+                          style={{ color: 'var(--color-text)' }}
+                        >
+                          {getResourceName(entry)}
+                        </Link>
+                        {entry.organizationName && entry.organizationName !== entry.resourceName && (
+                          <p className="text-sm truncate mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>{entry.organizationName}</p>
+                        )}
+                      </div>
+                      <span className={`status-badge ${entry.status}`}>
+                        {statusConfig[entry.status][language]}
+                      </span>
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap gap-4 text-sm">
+                      {entry.contactPerson && (
+                        <div className="flex items-center gap-2">
+                          <svg className="w-4 h-4" style={{ color: 'var(--color-text-muted)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                          <span className="font-medium" style={{ color: 'var(--color-text)' }}>{entry.contactPerson}</span>
+                        </div>
+                      )}
+                      {entry.dateContacted && (
+                        <div className="flex items-center gap-2">
+                          <svg className="w-4 h-4" style={{ color: 'var(--color-text-muted)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          <span style={{ color: 'var(--color-text)' }}>{formatDate(entry.dateContacted)}</span>
+                        </div>
                       )}
                     </div>
-                    <span className={`status-badge ${entry.status}`}>
-                      {statusConfig[entry.status][language]}
-                    </span>
-                  </div>
 
-                  <div className="mt-4 flex flex-wrap gap-4 text-sm">
-                    {entry.contactPerson && (
-                      <div className="flex items-center gap-2">
-                        <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                        <span className="text-gray-700 font-medium">{entry.contactPerson}</span>
-                      </div>
+                    {entry.notes && (
+                      <p className="mt-4 text-sm line-clamp-2 rounded-xl p-3" style={{ background: 'var(--color-bg)', color: 'var(--color-text-secondary)' }}>{entry.notes}</p>
                     )}
-                    {entry.dateContacted && (
-                      <div className="flex items-center gap-2">
-                        <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+
+                    <div className="mt-4 pt-4 flex gap-4" style={{ borderTop: '1px solid var(--color-border)' }}>
+                      <button
+                        onClick={() => handleEdit(entry)}
+                        className="flex items-center gap-2 text-sm font-semibold btn-touch"
+                        style={{ color: 'var(--color-primary)' }}
+                        aria-label={`${t.editEntry}: ${getResourceName(entry)}`}
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
-                        <span className="text-gray-700">{formatDate(entry.dateContacted)}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {entry.notes && (
-                    <p className="mt-4 text-sm text-gray-600 line-clamp-2 bg-gray-50 rounded-xl p-3">{entry.notes}</p>
-                  )}
-
-                  <div className="mt-4 pt-4 border-t border-gray-100 flex gap-4">
-                    <button
-                      onClick={() => handleEdit(entry)}
-                      className="flex items-center gap-2 text-sm font-semibold text-[hsl(var(--color-primary))] hover:opacity-70 transition-opacity"
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
-                      {t.edit}
-                    </button>
-                    <button
-                      onClick={() => handleDelete(entry.id)}
-                      className="flex items-center gap-2 text-sm font-semibold text-red-500 hover:opacity-70 transition-opacity"
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                      {t.delete}
-                    </button>
-                  </div>
-                </div>
+                        {t.edit}
+                      </button>
+                      <button
+                        onClick={() => handleDelete(entry.id)}
+                        className="flex items-center gap-2 text-sm font-semibold btn-touch"
+                        style={{ color: 'var(--color-error)' }}
+                        aria-label={`${t.deleteEntry}: ${getResourceName(entry)}`}
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        {t.delete}
+                      </button>
+                    </div>
+                  </article>
+                </li>
               ))}
-            </div>
+              </ul>
+            </section>
           </>
         )}
       </main>
 
       {/* Edit Modal */}
       {editingEntry && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center sm:items-center"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-title"
+        >
           <div
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            className="absolute inset-0"
+            style={{ background: 'rgba(0,0,0,0.5)' }}
             onClick={() => setEditingEntry(null)}
+            aria-label={t.closeModal}
           />
-          <div className="relative w-full max-w-lg bg-white rounded-t-[2rem] sm:rounded-[2rem] p-8 max-h-[90vh] overflow-y-auto scale-in shadow-2xl">
+          <div
+            className="relative w-full max-w-lg rounded-t-[2rem] sm:rounded-[2rem] p-8 max-h-[90vh] overflow-y-auto scale-in shadow-2xl"
+            style={{ background: 'var(--color-surface)' }}
+          >
             {/* Modal Handle */}
-            <div className="w-12 h-1.5 rounded-full bg-gray-200 mx-auto mb-6 sm:hidden" />
+            <div className="w-12 h-1.5 rounded-full mx-auto mb-6 sm:hidden" style={{ background: 'var(--color-border)' }} aria-hidden="true" />
 
-            <h2 className="text-xl font-bold mb-6">{t.editTracking}</h2>
+            <h2 id="modal-title" className="text-xl font-bold mb-6">{t.editTracking}</h2>
 
             {/* Status */}
-            <div className="mb-6">
-              <label className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 block">
+            <fieldset className="mb-6">
+              <legend className="text-sm font-semibold uppercase tracking-wider mb-3 block" style={{ color: 'var(--color-text-secondary)' }}>
                 {t.status}
-              </label>
-              <div className="grid grid-cols-2 gap-3">
+              </legend>
+              <div className="grid grid-cols-2 gap-3" role="radiogroup" aria-label={t.status}>
                 {(Object.keys(statusConfig) as TrackerStatus[]).map((status) => (
                   <button
                     key={status}
                     onClick={() => setFormStatus(status)}
                     className={`selection-btn text-center py-4 ${formStatus === status ? 'selected' : ''}`}
+                    role="radio"
+                    aria-checked={formStatus === status}
                   >
                     <span className="font-semibold text-sm">
                       {statusConfig[status][language]}
@@ -260,14 +302,15 @@ export default function TrackerClient() {
                   </button>
                 ))}
               </div>
-            </div>
+            </fieldset>
 
             {/* Contact Person */}
             <div className="mb-5">
-              <label className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 block">
-                {t.contactPerson} <span className="text-gray-300 normal-case">({t.optional})</span>
+              <label htmlFor="contact-person" className="text-sm font-semibold uppercase tracking-wider mb-3 block" style={{ color: 'var(--color-text-secondary)' }}>
+                {t.contactPerson} <span style={{ color: 'var(--color-text-muted)' }} className="normal-case">({t.optional})</span>
               </label>
               <input
+                id="contact-person"
                 type="text"
                 value={formContact}
                 onChange={(e) => setFormContact(e.target.value)}
@@ -278,10 +321,11 @@ export default function TrackerClient() {
 
             {/* Date Contacted */}
             <div className="mb-5">
-              <label className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 block">
+              <label htmlFor="date-contacted" className="text-sm font-semibold uppercase tracking-wider mb-3 block" style={{ color: 'var(--color-text-secondary)' }}>
                 {t.dateContacted}
               </label>
               <input
+                id="date-contacted"
                 type="date"
                 value={formDate}
                 onChange={(e) => setFormDate(e.target.value)}
@@ -291,10 +335,11 @@ export default function TrackerClient() {
 
             {/* Notes */}
             <div className="mb-8">
-              <label className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 block">
-                {t.notes} <span className="text-gray-300 normal-case">({t.optional})</span>
+              <label htmlFor="notes" className="text-sm font-semibold uppercase tracking-wider mb-3 block" style={{ color: 'var(--color-text-secondary)' }}>
+                {t.notes} <span style={{ color: 'var(--color-text-muted)' }} className="normal-case">({t.optional})</span>
               </label>
               <textarea
+                id="notes"
                 value={formNotes}
                 onChange={(e) => setFormNotes(e.target.value)}
                 rows={3}

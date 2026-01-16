@@ -68,6 +68,10 @@ const content = {
     noResults: 'No resources found',
     tryDifferent: 'Try a different search term or category',
     openNow: 'Open Now',
+    backHome: 'Go back to home page',
+    filterBy: 'Filter by category',
+    searchLabel: 'Search for resources',
+    resultsLabel: 'Search results',
   },
   es: {
     title: 'Todos los Recursos',
@@ -80,6 +84,10 @@ const content = {
     noResults: 'No se encontraron recursos',
     tryDifferent: 'Intente con otro término o categoría',
     openNow: 'Abierto Ahora',
+    backHome: 'Volver a la página principal',
+    filterBy: 'Filtrar por categoría',
+    searchLabel: 'Buscar recursos',
+    resultsLabel: 'Resultados de búsqueda',
   }
 }
 
@@ -103,11 +111,16 @@ export default function ResourcesClient({ resources, query, category }: Props) {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-[hsl(var(--color-bg))] border-b border-[hsl(var(--color-border))] px-5 py-4">
+      <header className="sticky top-0 z-10 px-5 py-4" style={{ background: 'var(--color-bg)', borderBottom: '2px solid var(--color-border)' }} role="banner">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <Link href="/" className="text-gray-500 hover:text-gray-900 transition-colors">
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <Link
+              href="/"
+              className="p-2 -ml-2 rounded-lg"
+              style={{ color: 'var(--color-text-secondary)' }}
+              aria-label={t.backHome}
+            >
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </Link>
@@ -117,9 +130,9 @@ export default function ResourcesClient({ resources, query, category }: Props) {
         </div>
 
         {/* Search */}
-        <form action="/resources" method="GET">
+        <form action="/resources" method="GET" role="search" aria-label={t.searchLabel}>
           <div className="relative">
-            <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--color-text-muted)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input
@@ -128,84 +141,94 @@ export default function ResourcesClient({ resources, query, category }: Props) {
               defaultValue={query}
               placeholder={t.search}
               className="input pl-12"
+              aria-label={t.searchLabel}
             />
           </div>
           {category && <input type="hidden" name="category" value={category} />}
         </form>
       </header>
 
-      <div className="px-5 py-6">
+      <main className="px-5 py-6" role="main" id="main-content">
         {/* Category filter */}
-        <div className="flex gap-2 overflow-x-auto pb-4 mb-4 -mx-5 px-5 scrollbar-hide">
-          <Link
-            href="/resources"
-            className={`category-pill whitespace-nowrap ${!category ? 'active' : ''}`}
-          >
-            {t.all}
-          </Link>
-          <button
-            onClick={() => setOpenNowFilter(!openNowFilter)}
-            className={`category-pill whitespace-nowrap ${openNowFilter ? 'active' : ''}`}
-          >
-            <span className="mr-1">🕐</span> {t.openNow}
-          </button>
-          {cats.map((cat) => (
+        <nav aria-label={t.filterBy}>
+          <div className="flex gap-2 overflow-x-auto pb-4 mb-4 -mx-5 px-5 scrollbar-hide" role="list">
             <Link
-              key={cat.slug}
-              href={`/resources?category=${cat.slug}${query ? `&q=${query}` : ''}`}
-              className={`category-pill whitespace-nowrap ${category === cat.slug ? 'active' : ''}`}
+              href="/resources"
+              className={`category-pill whitespace-nowrap ${!category ? 'active' : ''}`}
+              aria-current={!category ? 'page' : undefined}
             >
-              {cat.icon} {cat.name}
+              {t.all}
             </Link>
-          ))}
-        </div>
+            <button
+              onClick={() => setOpenNowFilter(!openNowFilter)}
+              className={`category-pill whitespace-nowrap ${openNowFilter ? 'active' : ''}`}
+              aria-pressed={openNowFilter}
+            >
+              <span className="mr-1" aria-hidden="true">🕐</span> {t.openNow}
+            </button>
+            {cats.map((cat) => (
+              <Link
+                key={cat.slug}
+                href={`/resources?category=${cat.slug}${query ? `&q=${query}` : ''}`}
+                className={`category-pill whitespace-nowrap ${category === cat.slug ? 'active' : ''}`}
+                aria-current={category === cat.slug ? 'page' : undefined}
+              >
+                <span aria-hidden="true">{cat.icon}</span> {cat.name}
+              </Link>
+            ))}
+          </div>
+        </nav>
 
-        {/* Results count */}
-        <p className="text-sm text-gray-500 mb-4">
+        {/* Results count - announced to screen readers */}
+        <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }} role="status" aria-live="polite">
           {filteredResources.length} {filteredResources.length !== 1 ? t.resources : t.resource}
           {query && ` ${t.forQuery} "${query}"`}
           {category && ` ${t.inCategory} ${getCatName(category)}`}
         </p>
 
         {/* Results */}
-        {filteredResources.length > 0 ? (
-          <div className="space-y-3">
-            {filteredResources.map((resource) => {
-              const name = language === 'es' && resource.nameEs ? resource.nameEs : resource.name
-              const description = language === 'es' && resource.descriptionEs ? resource.descriptionEs : resource.description
+        <section aria-label={t.resultsLabel}>
+          {filteredResources.length > 0 ? (
+            <ul className="space-y-3" role="list">
+              {filteredResources.map((resource) => {
+                const name = language === 'es' && resource.nameEs ? resource.nameEs : resource.name
+                const description = language === 'es' && resource.descriptionEs ? resource.descriptionEs : resource.description
 
-              return (
-                <Link key={resource.id} href={`/resources/${resource.id}`} className="card block">
-                  <div className="flex gap-2 mb-2">
-                    {resource.categories.slice(0, 2).map((cat) => {
-                      const catInfo = cats.find(c => c.slug === cat)
-                      return (
-                        <span key={cat} className="text-xs text-gray-500">
-                          {catInfo?.icon} {catInfo?.name}
-                        </span>
-                      )
-                    })}
-                  </div>
-                  <h3 className="font-semibold text-[15px] mb-1">{name}</h3>
-                  {resource.organization && resource.organization !== resource.name && (
-                    <p className="text-sm text-gray-500 mb-2">{resource.organization}</p>
-                  )}
-                  <p className="text-sm text-gray-600 line-clamp-2">{description}</p>
-                  {resource.phone && (
-                    <p className="text-sm text-[hsl(var(--color-primary))] mt-2 font-medium">{resource.phone}</p>
-                  )}
-                </Link>
-              )
-            })}
-          </div>
-        ) : (
-          <div className="text-center py-16">
-            <div className="text-5xl mb-4">🔍</div>
-            <h2 className="text-xl font-semibold mb-2">{t.noResults}</h2>
-            <p className="text-gray-500">{t.tryDifferent}</p>
-          </div>
-        )}
-      </div>
+                return (
+                  <li key={resource.id}>
+                    <Link href={`/resources/${resource.id}`} className="card block">
+                      <div className="flex gap-2 mb-2">
+                        {resource.categories.slice(0, 2).map((cat) => {
+                          const catInfo = cats.find(c => c.slug === cat)
+                          return (
+                            <span key={cat} className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                              <span aria-hidden="true">{catInfo?.icon}</span> {catInfo?.name}
+                            </span>
+                          )
+                        })}
+                      </div>
+                      <h3 className="font-semibold text-[15px] mb-1">{name}</h3>
+                      {resource.organization && resource.organization !== resource.name && (
+                        <p className="text-sm mb-2" style={{ color: 'var(--color-text-secondary)' }}>{resource.organization}</p>
+                      )}
+                      <p className="text-sm line-clamp-2" style={{ color: 'var(--color-text-secondary)' }}>{description}</p>
+                      {resource.phone && (
+                        <p className="text-sm mt-2 font-medium" style={{ color: 'var(--color-primary)' }}>{resource.phone}</p>
+                      )}
+                    </Link>
+                  </li>
+                )
+              })}
+            </ul>
+          ) : (
+            <div className="text-center py-16" role="status">
+              <div className="text-5xl mb-4" aria-hidden="true">🔍</div>
+              <h2 className="text-xl font-semibold mb-2">{t.noResults}</h2>
+              <p style={{ color: 'var(--color-text-secondary)' }}>{t.tryDifferent}</p>
+            </div>
+          )}
+        </section>
+      </main>
     </div>
   )
 }

@@ -85,6 +85,11 @@ const content = {
     cancel: 'Cancel',
     delete: 'Delete',
     optional: 'Optional',
+    // Accessibility
+    backToResources: 'Back to all resources',
+    callPhone: 'Call phone number',
+    getDirections: 'Get directions to location',
+    closeDialog: 'Close dialog',
   },
   es: {
     about: 'Acerca de',
@@ -126,6 +131,11 @@ const content = {
     cancel: 'Cancelar',
     delete: 'Eliminar',
     optional: 'Opcional',
+    // Accessibility
+    backToResources: 'Volver a todos los recursos',
+    callPhone: 'Llamar al número de teléfono',
+    getDirections: 'Obtener direcciones a la ubicación',
+    closeDialog: 'Cerrar diálogo',
   }
 }
 
@@ -214,10 +224,15 @@ export default function ResourceDetailClient({ resource }: Props) {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-[hsl(var(--color-bg))] border-b border-[hsl(var(--color-border))] px-5 py-4">
+      <header className="sticky top-0 z-10 px-5 py-4" style={{ background: 'var(--color-bg)', borderBottom: '2px solid var(--color-border)' }} role="banner">
         <div className="flex items-center justify-between">
-          <Link href="/resources" className="text-gray-500 hover:text-gray-900 transition-colors">
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <Link
+            href="/resources"
+            className="p-2 -ml-2 rounded-lg"
+            style={{ color: 'var(--color-text-secondary)' }}
+            aria-label={t.backToResources}
+          >
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </Link>
@@ -225,23 +240,25 @@ export default function ResourceDetailClient({ resource }: Props) {
         </div>
       </header>
 
-      <main className="px-5 py-6 fade-in">
+      <main className="px-5 py-6 fade-in" role="main" id="main-content">
         {/* Categories */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          {resource.categories.map((cat) => {
-            const catInfo = getCategoryInfo(cat)
-            return (
-              <Link key={cat} href={`/category/${cat}`} className="category-pill">
-                {catInfo?.icon} {catInfo?.name}
-              </Link>
-            )
-          })}
-        </div>
+        <nav aria-label={language === 'en' ? 'Resource categories' : 'Categorías del recurso'}>
+          <div className="flex flex-wrap gap-2 mb-4">
+            {resource.categories.map((cat) => {
+              const catInfo = getCategoryInfo(cat)
+              return (
+                <Link key={cat} href={`/category/${cat}`} className="category-pill">
+                  <span aria-hidden="true">{catInfo?.icon}</span> {catInfo?.name}
+                </Link>
+              )
+            })}
+          </div>
+        </nav>
 
         {/* Name & Organization */}
         <h1 className="text-2xl font-semibold mb-1">{name}</h1>
         {resource.organization && resource.organization !== resource.name && (
-          <p className="text-gray-500">{resource.organization}</p>
+          <p style={{ color: 'var(--color-text-secondary)' }}>{resource.organization}</p>
         )}
 
         {/* About */}
@@ -251,13 +268,14 @@ export default function ResourceDetailClient({ resource }: Props) {
         </div>
 
         {/* Action Buttons */}
-        <div className="grid grid-cols-2 gap-3 mt-6">
+        <div className="grid grid-cols-2 gap-3 mt-6" role="group" aria-label={language === 'en' ? 'Quick actions' : 'Acciones rápidas'}>
           {resource.phone && (
             <a
               href={`tel:${resource.phone.replace(/\D/g, '')}`}
               className="btn-primary text-center flex items-center justify-center gap-2"
+              aria-label={`${t.callPhone}: ${resource.phone}`}
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
               </svg>
               {t.call}
@@ -269,8 +287,9 @@ export default function ResourceDetailClient({ resource }: Props) {
               target="_blank"
               rel="noopener noreferrer"
               className="btn-secondary text-center flex items-center justify-center gap-2"
+              aria-label={t.getDirections}
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
@@ -419,24 +438,39 @@ export default function ResourceDetailClient({ resource }: Props) {
 
         {/* Track Modal */}
         {showTrackModal && (
-          <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
-            <div className="absolute inset-0 bg-black/50" onClick={() => setShowTrackModal(false)} />
-            <div className="relative w-full max-w-lg bg-white rounded-t-2xl sm:rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
-              <h2 className="text-lg font-semibold mb-4">
+          <div
+            className="fixed inset-0 z-50 flex items-end justify-center sm:items-center"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="track-modal-title"
+          >
+            <div
+              className="absolute inset-0"
+              style={{ background: 'rgba(0,0,0,0.5)' }}
+              onClick={() => setShowTrackModal(false)}
+              aria-label={t.closeDialog}
+            />
+            <div
+              className="relative w-full max-w-lg rounded-t-2xl sm:rounded-2xl p-6 max-h-[90vh] overflow-y-auto"
+              style={{ background: 'var(--color-surface)' }}
+            >
+              <h2 id="track-modal-title" className="text-lg font-semibold mb-4">
                 {existingEntry ? t.editTracking : t.track}
               </h2>
 
               {/* Status */}
-              <div className="mb-4">
-                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 block">
+              <fieldset className="mb-4">
+                <legend className="text-xs font-semibold uppercase tracking-wider mb-2 block" style={{ color: 'var(--color-text-secondary)' }}>
                   {t.status}
-                </label>
-                <div className="grid grid-cols-2 gap-2">
+                </legend>
+                <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label={t.status}>
                   {(Object.keys(statusConfig) as TrackerStatus[]).map((status) => (
                     <button
                       key={status}
                       onClick={() => setFormStatus(status)}
                       className={`selection-btn text-center py-3 ${formStatus === status ? 'selected' : ''}`}
+                      role="radio"
+                      aria-checked={formStatus === status}
                     >
                       <span className="font-medium text-sm">
                         {statusConfig[status][language]}
@@ -444,14 +478,15 @@ export default function ResourceDetailClient({ resource }: Props) {
                     </button>
                   ))}
                 </div>
-              </div>
+              </fieldset>
 
               {/* Contact Person */}
               <div className="mb-4">
-                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 block">
-                  {t.contactPerson} <span className="text-gray-300">({t.optional})</span>
+                <label htmlFor="contact-person-input" className="text-xs font-semibold uppercase tracking-wider mb-2 block" style={{ color: 'var(--color-text-secondary)' }}>
+                  {t.contactPerson} <span style={{ color: 'var(--color-text-muted)' }}>({t.optional})</span>
                 </label>
                 <input
+                  id="contact-person-input"
                   type="text"
                   value={formContact}
                   onChange={(e) => setFormContact(e.target.value)}
@@ -462,10 +497,11 @@ export default function ResourceDetailClient({ resource }: Props) {
 
               {/* Date Contacted */}
               <div className="mb-4">
-                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 block">
+                <label htmlFor="date-contacted-input" className="text-xs font-semibold uppercase tracking-wider mb-2 block" style={{ color: 'var(--color-text-secondary)' }}>
                   {t.dateContacted}
                 </label>
                 <input
+                  id="date-contacted-input"
                   type="date"
                   value={formDate}
                   onChange={(e) => setFormDate(e.target.value)}
@@ -475,10 +511,11 @@ export default function ResourceDetailClient({ resource }: Props) {
 
               {/* Notes */}
               <div className="mb-6">
-                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 block">
-                  {t.notes} <span className="text-gray-300">({t.optional})</span>
+                <label htmlFor="notes-input" className="text-xs font-semibold uppercase tracking-wider mb-2 block" style={{ color: 'var(--color-text-secondary)' }}>
+                  {t.notes} <span style={{ color: 'var(--color-text-muted)' }}>({t.optional})</span>
                 </label>
                 <textarea
+                  id="notes-input"
                   value={formNotes}
                   onChange={(e) => setFormNotes(e.target.value)}
                   placeholder="Next steps, notes..."
@@ -492,7 +529,8 @@ export default function ResourceDetailClient({ resource }: Props) {
                 {existingEntry && (
                   <button
                     onClick={handleDelete}
-                    className="px-4 py-3 text-red-600 font-medium hover:bg-red-50 rounded-xl transition-colors"
+                    className="px-4 py-3 font-medium rounded-xl transition-colors btn-touch"
+                    style={{ color: 'var(--color-error)' }}
                   >
                     {t.delete}
                   </button>
