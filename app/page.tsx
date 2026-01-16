@@ -72,70 +72,66 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <header className="px-5 py-4 flex items-center justify-between">
+      <header className="px-5 py-5 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight">{t.title}</h1>
+          <h1 className="text-xl font-bold text-gradient">{t.title}</h1>
         </div>
         <LanguageToggle />
       </header>
 
       <main className="px-5 pb-8">
         {/* Hero Card */}
-        <Link href="/wizard" className="block mb-8 fade-in">
-          <div className="hero-card">
-            <h2 className="text-2xl font-semibold mb-2">{t.heroTitle}</h2>
-            <p className="opacity-90 mb-6 text-sm">{t.heroSubtitle}</p>
-            <span className="inline-flex items-center gap-2 bg-white/20 backdrop-blur px-5 py-2.5 rounded-full text-sm font-medium">
+        <Link href="/wizard" className="block mb-10 fade-in">
+          <div className="hero-card pulse-glow">
+            <div className="text-4xl mb-4">&#10024;</div>
+            <h2 className="text-2xl font-bold mb-3">{t.heroTitle}</h2>
+            <p className="opacity-90 mb-8 text-base leading-relaxed">{t.heroSubtitle}</p>
+            <span className="inline-flex items-center gap-3 bg-white/20 backdrop-blur-md px-6 py-3 rounded-2xl text-base font-semibold shadow-lg hover:bg-white/30 transition-all duration-300">
               {t.heroButton}
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
             </span>
           </div>
         </Link>
 
         {/* Browse by Category */}
-        <section className="mb-8 slide-up">
-          <h2 className="text-lg font-semibold mb-4">{t.browseTitle}</h2>
-          <div className="grid grid-cols-2 gap-3">
-            {cats.map((category, i) => (
+        <section className="mb-8">
+          <h2 className="text-lg font-semibold mb-5 fade-in">{t.browseTitle}</h2>
+          <div className="grid grid-cols-2 gap-4 stagger-children">
+            {cats.map((category) => (
               <Link
                 key={category.slug}
                 href={`/category/${category.slug}`}
-                className="card"
-                style={{ animationDelay: `${i * 50}ms` }}
+                className="card group"
               >
-                <div className="text-2xl mb-2">{category.icon}</div>
-                <h3 className="font-medium text-[15px]">{category.name}</h3>
-                <p className="text-xs text-gray-500 mt-1 leading-snug">{category.description}</p>
+                <div className="text-3xl mb-3 group-hover:scale-110 transition-transform duration-300">{category.icon}</div>
+                <h3 className="font-semibold text-[15px] mb-1">{category.name}</h3>
+                <p className="text-sm text-gray-500 leading-snug">{category.description}</p>
               </Link>
             ))}
           </div>
         </section>
 
         {/* CTA Section */}
-        <div className="cta-card space-y-4">
-          <p className="text-sm text-gray-600 mb-3">
+        <div className="cta-card space-y-4 slide-up">
+          <p className="text-base text-gray-600 mb-4 font-medium">
             {language === 'en' ? 'Need personalized help?' : '¿Necesita ayuda personalizada?'}
           </p>
           <a href="tel:211" className="btn-phone w-full">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
             </svg>
             {t.call211}
           </a>
-          <Link href="/resources" className="btn-outline-lg w-full">
-            {t.viewAll}
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </Link>
-          <Link href="/tracker" className="btn-outline-lg w-full">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
-            {t.myTracker}
-          </Link>
+          <div className="grid grid-cols-2 gap-3 pt-2">
+            <Link href="/resources" className="btn-outline-lg">
+              <span className="relative z-10">{t.viewAll}</span>
+            </Link>
+            <Link href="/tracker" className="btn-outline-lg">
+              <span className="relative z-10">{t.myTracker}</span>
+            </Link>
+          </div>
         </div>
       </main>
 
