@@ -95,6 +95,29 @@ export const translations = {
     language: 'Language',
     english: 'English',
     spanish: 'Español',
+
+    // Tracker
+    myTracker: 'My Tracker',
+    trackerEmpty: 'No tracked resources yet',
+    trackerEmptySubtitle: 'Use the Track button on any resource to start tracking your outreach',
+    trackResource: 'Track',
+    updateTracking: 'Update',
+    editTracking: 'Edit Tracking',
+    contactPerson: 'Contact Person',
+    dateContacted: 'Date Contacted',
+    status: 'Status',
+    notes: 'Notes / Next Steps',
+    saveTracking: 'Save',
+    cancelTracking: 'Cancel',
+    deleteTracking: 'Delete',
+    deleteConfirm: 'Delete this tracking entry?',
+    selectStatus: 'Select status',
+    optional: 'Optional',
+    viewTracker: 'View Tracker',
+    tracked: 'Tracked',
+
+    // Open Now
+    openNow: 'Open Now',
   },
 
   es: {
@@ -191,6 +214,29 @@ export const translations = {
     language: 'Idioma',
     english: 'English',
     spanish: 'Español',
+
+    // Tracker
+    myTracker: 'Mi Seguimiento',
+    trackerEmpty: 'No hay recursos rastreados',
+    trackerEmptySubtitle: 'Use el botón Rastrear en cualquier recurso para comenzar',
+    trackResource: 'Rastrear',
+    updateTracking: 'Actualizar',
+    editTracking: 'Editar Seguimiento',
+    contactPerson: 'Persona de Contacto',
+    dateContacted: 'Fecha de Contacto',
+    status: 'Estado',
+    notes: 'Notas / Próximos Pasos',
+    saveTracking: 'Guardar',
+    cancelTracking: 'Cancelar',
+    deleteTracking: 'Eliminar',
+    deleteConfirm: '¿Eliminar esta entrada?',
+    selectStatus: 'Seleccionar estado',
+    optional: 'Opcional',
+    viewTracker: 'Ver Seguimiento',
+    tracked: 'Rastreado',
+
+    // Open Now
+    openNow: 'Abierto Ahora',
   }
 }
 

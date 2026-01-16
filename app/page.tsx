@@ -44,6 +44,7 @@ const content = {
     heroButton: 'Get Started',
     browseTitle: 'Browse by Category',
     viewAll: 'View all resources',
+    myTracker: 'My Tracker',
     call211: 'Call 211',
     footer1: 'A community resource for New Haven residents',
     footer2: 'Not affiliated with any government agency',
@@ -56,6 +57,7 @@ const content = {
     heroButton: 'Comenzar',
     browseTitle: 'Buscar por Categoría',
     viewAll: 'Ver todos los recursos',
+    myTracker: 'Mi Seguimiento',
     call211: 'Llamar al 211',
     footer1: 'Un recurso comunitario para residentes de New Haven',
     footer2: 'No está afiliado a ninguna agencia gubernamental',
@@ -127,6 +129,12 @@ export default function Home() {
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
+          </Link>
+          <Link href="/tracker" className="btn-outline-lg w-full">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            {t.myTracker}
           </Link>
         </div>
       </main>

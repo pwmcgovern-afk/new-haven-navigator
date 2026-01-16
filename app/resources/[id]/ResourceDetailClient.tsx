@@ -1,9 +1,12 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import ShareButton from '@/components/ShareButton'
 import LanguageToggle from '@/components/LanguageToggle'
 import { useLanguage } from '@/components/LanguageContext'
+import { useTracker } from '@/components/TrackerContext'
+import { statusConfig, type TrackerStatus } from '@/lib/trackerTypes'
 import type { Resource } from '@/lib/types'
 
 interface Props {
@@ -69,6 +72,19 @@ const content = {
     seniors: 'Seniors (60+)',
     disabled: 'People with disabilities',
     domestic_violence: 'DV survivors',
+    // Tracker
+    track: 'Track',
+    tracked: 'Tracked',
+    updateTracking: 'Update',
+    editTracking: 'Edit Tracking',
+    contactPerson: 'Contact Person',
+    dateContacted: 'Date Contacted',
+    status: 'Status',
+    notes: 'Notes / Next Steps',
+    save: 'Save',
+    cancel: 'Cancel',
+    delete: 'Delete',
+    optional: 'Optional',
   },
   es: {
     about: 'Acerca de',
@@ -97,6 +113,19 @@ const content = {
     seniors: 'Personas mayores (60+)',
     disabled: 'Personas con discapacidades',
     domestic_violence: 'Sobrevivientes de VD',
+    // Tracker
+    track: 'Rastrear',
+    tracked: 'Rastreado',
+    updateTracking: 'Actualizar',
+    editTracking: 'Editar Seguimiento',
+    contactPerson: 'Persona de Contacto',
+    dateContacted: 'Fecha de Contacto',
+    status: 'Estado',
+    notes: 'Notas / Próximos Pasos',
+    save: 'Guardar',
+    cancel: 'Cancelar',
+    delete: 'Eliminar',
+    optional: 'Opcional',
   }
 }
 
@@ -104,6 +133,58 @@ export default function ResourceDetailClient({ resource }: Props) {
   const { language } = useLanguage()
   const t = content[language]
   const cats = categories[language]
+  const { getEntryByResourceId, addEntry, updateEntry, deleteEntry } = useTracker()
+
+  const [showTrackModal, setShowTrackModal] = useState(false)
+  const existingEntry = getEntryByResourceId(resource.id)
+
+  const [formStatus, setFormStatus] = useState<TrackerStatus>(existingEntry?.status || 'reached_out')
+  const [formContact, setFormContact] = useState(existingEntry?.contactPerson || '')
+  const [formDate, setFormDate] = useState(existingEntry?.dateContacted || new Date().toISOString().split('T')[0])
+  const [formNotes, setFormNotes] = useState(existingEntry?.notes || '')
+
+  const resetForm = () => {
+    setFormStatus(existingEntry?.status || 'reached_out')
+    setFormContact(existingEntry?.contactPerson || '')
+    setFormDate(existingEntry?.dateContacted || new Date().toISOString().split('T')[0])
+    setFormNotes(existingEntry?.notes || '')
+  }
+
+  const handleOpenModal = () => {
+    resetForm()
+    setShowTrackModal(true)
+  }
+
+  const handleSave = () => {
+    const name = language === 'es' && resource.nameEs ? resource.nameEs : resource.name
+    if (existingEntry) {
+      updateEntry(existingEntry.id, {
+        status: formStatus,
+        contactPerson: formContact,
+        dateContacted: formDate,
+        notes: formNotes
+      })
+    } else {
+      addEntry({
+        resourceId: resource.id,
+        resourceName: resource.name,
+        resourceNameEs: resource.nameEs || undefined,
+        organizationName: resource.organization || undefined,
+        status: formStatus,
+        contactPerson: formContact,
+        dateContacted: formDate,
+        notes: formNotes
+      })
+    }
+    setShowTrackModal(false)
+  }
+
+  const handleDelete = () => {
+    if (existingEntry) {
+      deleteEntry(existingEntry.id)
+      setShowTrackModal(false)
+    }
+  }
 
   const getCategoryInfo = (slug: string) => cats.find(c => c.slug === slug)
 
@@ -311,10 +392,127 @@ export default function ResourceDetailClient({ resource }: Props) {
           </div>
         )}
 
-        {/* Share */}
-        <div className="mt-8 pt-6 border-t border-[hsl(var(--color-border))]">
+        {/* Share & Track */}
+        <div className="mt-8 pt-6 border-t border-[hsl(var(--color-border))] flex gap-3">
           <ShareButton title={name} text={description} />
+          <button
+            onClick={handleOpenModal}
+            className={`btn-secondary flex-1 flex items-center justify-center gap-2 ${existingEntry ? 'bg-green-50 border-green-200' : ''}`}
+          >
+            {existingEntry ? (
+              <>
+                <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span className="text-green-700">{t.tracked}</span>
+              </>
+            ) : (
+              <>
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                {t.track}
+              </>
+            )}
+          </button>
         </div>
+
+        {/* Track Modal */}
+        {showTrackModal && (
+          <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
+            <div className="absolute inset-0 bg-black/50" onClick={() => setShowTrackModal(false)} />
+            <div className="relative w-full max-w-lg bg-white rounded-t-2xl sm:rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
+              <h2 className="text-lg font-semibold mb-4">
+                {existingEntry ? t.editTracking : t.track}
+              </h2>
+
+              {/* Status */}
+              <div className="mb-4">
+                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 block">
+                  {t.status}
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {(Object.keys(statusConfig) as TrackerStatus[]).map((status) => (
+                    <button
+                      key={status}
+                      onClick={() => setFormStatus(status)}
+                      className={`selection-btn text-center py-3 ${formStatus === status ? 'selected' : ''}`}
+                    >
+                      <span className="font-medium text-sm">
+                        {statusConfig[status][language]}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Contact Person */}
+              <div className="mb-4">
+                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 block">
+                  {t.contactPerson} <span className="text-gray-300">({t.optional})</span>
+                </label>
+                <input
+                  type="text"
+                  value={formContact}
+                  onChange={(e) => setFormContact(e.target.value)}
+                  placeholder="John Smith"
+                  className="input"
+                />
+              </div>
+
+              {/* Date Contacted */}
+              <div className="mb-4">
+                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 block">
+                  {t.dateContacted}
+                </label>
+                <input
+                  type="date"
+                  value={formDate}
+                  onChange={(e) => setFormDate(e.target.value)}
+                  className="input"
+                />
+              </div>
+
+              {/* Notes */}
+              <div className="mb-6">
+                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 block">
+                  {t.notes} <span className="text-gray-300">({t.optional})</span>
+                </label>
+                <textarea
+                  value={formNotes}
+                  onChange={(e) => setFormNotes(e.target.value)}
+                  placeholder="Next steps, notes..."
+                  rows={3}
+                  className="input resize-none"
+                />
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3">
+                {existingEntry && (
+                  <button
+                    onClick={handleDelete}
+                    className="px-4 py-3 text-red-600 font-medium hover:bg-red-50 rounded-xl transition-colors"
+                  >
+                    {t.delete}
+                  </button>
+                )}
+                <button
+                  onClick={() => setShowTrackModal(false)}
+                  className="flex-1 btn-secondary"
+                >
+                  {t.cancel}
+                </button>
+                <button
+                  onClick={handleSave}
+                  className="flex-1 btn-primary"
+                >
+                  {t.save}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Verification */}
         <p className="mt-4 text-xs text-gray-400">

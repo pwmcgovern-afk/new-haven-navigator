@@ -1,8 +1,10 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { useLanguage } from '@/components/LanguageContext'
 import LanguageToggle from '@/components/LanguageToggle'
+import { isOpenNow } from '@/lib/hoursParser'
 
 interface Resource {
   id: string
@@ -14,6 +16,7 @@ interface Resource {
   categories: string[]
   address: string | null
   phone: string | null
+  hours: string | null
 }
 
 interface Props {
@@ -64,6 +67,7 @@ const content = {
     inCategory: 'in',
     noResults: 'No resources found',
     tryDifferent: 'Try a different search term or category',
+    openNow: 'Open Now',
   },
   es: {
     title: 'Todos los Recursos',
@@ -75,6 +79,7 @@ const content = {
     inCategory: 'en',
     noResults: 'No se encontraron recursos',
     tryDifferent: 'Intente con otro término o categoría',
+    openNow: 'Abierto Ahora',
   }
 }
 
@@ -82,8 +87,18 @@ export default function ResourcesClient({ resources, query, category }: Props) {
   const { language } = useLanguage()
   const t = content[language]
   const cats = categories[language]
+  const [openNowFilter, setOpenNowFilter] = useState(false)
 
   const getCatName = (slug: string) => cats.find(c => c.slug === slug)?.name || slug
+
+  // Filter by "Open Now" if enabled
+  const filteredResources = openNowFilter
+    ? resources.filter(r => {
+        const status = isOpenNow(r.hours)
+        // Include if open (true) or unknown (null) - only exclude if definitely closed (false)
+        return status !== false
+      })
+    : resources
 
   return (
     <div className="min-h-screen">
@@ -128,6 +143,12 @@ export default function ResourcesClient({ resources, query, category }: Props) {
           >
             {t.all}
           </Link>
+          <button
+            onClick={() => setOpenNowFilter(!openNowFilter)}
+            className={`category-pill whitespace-nowrap ${openNowFilter ? 'active' : ''}`}
+          >
+            <span className="mr-1">🕐</span> {t.openNow}
+          </button>
           {cats.map((cat) => (
             <Link
               key={cat.slug}
@@ -141,15 +162,15 @@ export default function ResourcesClient({ resources, query, category }: Props) {
 
         {/* Results count */}
         <p className="text-sm text-gray-500 mb-4">
-          {resources.length} {resources.length !== 1 ? t.resources : t.resource}
+          {filteredResources.length} {filteredResources.length !== 1 ? t.resources : t.resource}
           {query && ` ${t.forQuery} "${query}"`}
           {category && ` ${t.inCategory} ${getCatName(category)}`}
         </p>
 
         {/* Results */}
-        {resources.length > 0 ? (
+        {filteredResources.length > 0 ? (
           <div className="space-y-3">
-            {resources.map((resource) => {
+            {filteredResources.map((resource) => {
               const name = language === 'es' && resource.nameEs ? resource.nameEs : resource.name
               const description = language === 'es' && resource.descriptionEs ? resource.descriptionEs : resource.description
 

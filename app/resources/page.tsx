@@ -34,7 +34,8 @@ export default async function ResourcesPage({
       descriptionEs: true,
       categories: true,
       address: true,
-      phone: true
+      phone: true,
+      hours: true
     }
   })
 
