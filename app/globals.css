@@ -104,15 +104,35 @@
     max-width: 65ch; /* Optimal reading width */
   }
 
-  /* Links - always underlined for clarity */
+  /* Links - underlined only for inline text links */
   a {
     color: var(--color-primary);
-    text-decoration: underline;
-    text-underline-offset: 2px;
   }
 
   a:hover {
     color: var(--color-primary-hover);
+  }
+
+  /* Only underline links that are inline text (not cards, buttons, etc) */
+  p a, li a, .underline-links a {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  /* Remove underlines from interactive containers */
+  a.card,
+  a.btn-primary,
+  a.btn-secondary,
+  a.btn-phone,
+  a.btn-outline-lg,
+  a.category-pill,
+  a.selection-btn,
+  .card a,
+  .card-flat a,
+  .hero-card a,
+  .cta-card a,
+  nav a {
+    text-decoration: none;
   }
 
   /* Focus styles - highly visible for keyboard users */
