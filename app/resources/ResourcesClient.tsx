@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useLanguage } from '@/components/LanguageContext'
 import LanguageToggle from '@/components/LanguageToggle'
 import { isOpenNow } from '@/lib/hoursParser'
+import { getDistanceMiles } from '@/lib/geo'
 
 interface Resource {
   id: string
@@ -17,6 +18,8 @@ interface Resource {
   address: string | null
   phone: string | null
   hours: string | null
+  latitude: number | null
+  longitude: number | null
 }
 
 interface Props {
@@ -68,6 +71,7 @@ const content = {
     noResults: 'No resources found',
     tryDifferent: 'Try a different search term or category',
     openNow: 'Open Now',
+    nearMe: 'Near Me',
     backHome: 'Go back to home page',
     filterBy: 'Filter by category',
     searchLabel: 'Search for resources',
@@ -84,6 +88,7 @@ const content = {
     noResults: 'No se encontraron recursos',
     tryDifferent: 'Intente con otro término o categoría',
     openNow: 'Abierto Ahora',
+    nearMe: 'Cerca de Mí',
     backHome: 'Volver a la página principal',
     filterBy: 'Filtrar por categoría',
     searchLabel: 'Buscar recursos',
@@ -96,17 +101,57 @@ export default function ResourcesClient({ resources, query, category }: Props) {
   const t = content[language]
   const cats = categories[language]
   const [openNowFilter, setOpenNowFilter] = useState(false)
+  const [nearMeActive, setNearMeActive] = useState(false)
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
+  const [locationError, setLocationError] = useState(false)
 
   const getCatName = (slug: string) => cats.find(c => c.slug === slug)?.name || slug
 
+  const handleNearMe = useCallback(() => {
+    if (nearMeActive) {
+      setNearMeActive(false)
+      setUserLocation(null)
+      return
+    }
+    if (!navigator.geolocation) {
+      setLocationError(true)
+      return
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude })
+        setNearMeActive(true)
+        setLocationError(false)
+      },
+      () => setLocationError(true),
+      { timeout: 10000 }
+    )
+  }, [nearMeActive])
+
+  const getDistance = (r: Resource): number | null => {
+    if (!userLocation || !r.latitude || !r.longitude) return null
+    return getDistanceMiles(userLocation.lat, userLocation.lng, r.latitude, r.longitude)
+  }
+
   // Filter by "Open Now" if enabled
-  const filteredResources = openNowFilter
+  let filteredResources = openNowFilter
     ? resources.filter(r => {
         const status = isOpenNow(r.hours)
-        // Include if open (true) or unknown (null) - only exclude if definitely closed (false)
         return status !== false
       })
-    : resources
+    : [...resources]
+
+  // Sort by distance if Near Me is active
+  if (nearMeActive && userLocation) {
+    filteredResources.sort((a, b) => {
+      const distA = getDistance(a)
+      const distB = getDistance(b)
+      if (distA === null && distB === null) return 0
+      if (distA === null) return 1
+      if (distB === null) return 1
+      return distA - distB
+    })
+  }
 
   return (
     <div className="min-h-screen">
@@ -166,6 +211,13 @@ export default function ResourcesClient({ resources, query, category }: Props) {
             >
               <span className="mr-1" aria-hidden="true">🕐</span> {t.openNow}
             </button>
+            <button
+              onClick={handleNearMe}
+              className={`category-pill whitespace-nowrap ${nearMeActive ? 'active' : ''}`}
+              aria-pressed={nearMeActive}
+            >
+              <span className="mr-1" aria-hidden="true">📍</span> {t.nearMe}
+            </button>
             {cats.map((cat) => (
               <Link
                 key={cat.slug}
@@ -193,11 +245,12 @@ export default function ResourcesClient({ resources, query, category }: Props) {
               {filteredResources.map((resource) => {
                 const name = language === 'es' && resource.nameEs ? resource.nameEs : resource.name
                 const description = language === 'es' && resource.descriptionEs ? resource.descriptionEs : resource.description
+                const dist = nearMeActive ? getDistance(resource) : null
 
                 return (
                   <li key={resource.id}>
                     <Link href={`/resources/${resource.id}`} className="card block">
-                      <div className="flex gap-2 mb-2">
+                      <div className="flex gap-2 mb-2 items-center">
                         {resource.categories.slice(0, 2).map((cat) => {
                           const catInfo = cats.find(c => c.slug === cat)
                           return (
@@ -206,6 +259,11 @@ export default function ResourcesClient({ resources, query, category }: Props) {
                             </span>
                           )
                         })}
+                        {dist !== null && (
+                          <span className="ml-auto text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: 'var(--color-primary-light)', color: 'var(--color-primary)' }}>
+                            {dist < 0.1 ? '< 0.1' : dist.toFixed(1)} mi
+                          </span>
+                        )}
                       </div>
                       <h3 className="font-semibold text-[15px] mb-1">{name}</h3>
                       {resource.organization && resource.organization !== resource.name && (

@@ -3,6 +3,7 @@ import './globals.css'
 import { LanguageProvider } from '@/components/LanguageContext'
 import { TrackerProvider } from '@/components/TrackerContext'
 import CrisisBanner from '@/components/CrisisBanner'
+import AppFooter from '@/components/AppFooter'
 
 export const metadata: Metadata = {
   title: 'New Haven Navigator',
@@ -47,6 +48,7 @@ export default function RootLayout({
             <main className="max-w-lg mx-auto">
               <CrisisBanner />
               {children}
+              <AppFooter />
             </main>
           </TrackerProvider>
         </LanguageProvider>

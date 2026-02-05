@@ -37,7 +37,9 @@ export default async function ResourcesPage({
       categories: true,
       address: true,
       phone: true,
-      hours: true
+      hours: true,
+      latitude: true,
+      longitude: true
     }
   })
 

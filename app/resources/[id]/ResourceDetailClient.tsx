@@ -2,12 +2,15 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import ShareButton from '@/components/ShareButton'
 import LanguageToggle from '@/components/LanguageToggle'
 import { useLanguage } from '@/components/LanguageContext'
 import { useTracker } from '@/components/TrackerContext'
 import { statusConfig, type TrackerStatus } from '@/lib/trackerTypes'
 import type { Resource } from '@/lib/types'
+
+const ResourceMap = dynamic(() => import('@/components/ResourceMap'), { ssr: false })
 
 interface Props {
   resource: Resource
@@ -312,6 +315,14 @@ export default function ResourceDetailClient({ resource }: Props) {
                 {resource.city}, {resource.state} {resource.zip}
               </p>
             </div>
+          )}
+
+          {resource.latitude && resource.longitude && (
+            <ResourceMap
+              latitude={resource.latitude}
+              longitude={resource.longitude}
+              name={name}
+            />
           )}
 
           <div className="grid grid-cols-2 gap-5">

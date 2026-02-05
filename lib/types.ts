@@ -8,6 +8,8 @@ export interface Resource {
   city: string
   state: string
   zip: string | null
+  latitude: number | null
+  longitude: number | null
   phone: string | null
   website: string | null
   email: string | null
