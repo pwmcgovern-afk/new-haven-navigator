@@ -145,7 +145,7 @@ export default function ChatWidget() {
                 color: 'white',
               }}
             >
-              <h2 id="chat-panel-title" className="font-bold text-base">
+              <h2 id="chat-panel-title" className="font-bold text-base" style={{ color: 'white' }}>
                 {t('chatAssistant')}
               </h2>
               <button
