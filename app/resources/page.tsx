@@ -16,7 +16,9 @@ export default async function ResourcesPage({
           OR: [
             { name: { contains: q, mode: 'insensitive' } },
             { description: { contains: q, mode: 'insensitive' } },
-            { organization: { contains: q, mode: 'insensitive' } }
+            { organization: { contains: q, mode: 'insensitive' } },
+            { categories: { has: q.toLowerCase() } },
+            { address: { contains: q, mode: 'insensitive' } },
           ]
         } : {},
         category ? {

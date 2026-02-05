@@ -85,6 +85,8 @@ const content = {
     cancel: 'Cancel',
     delete: 'Delete',
     optional: 'Optional',
+    reportIssue: 'Report an issue',
+    reportIssueSubject: 'Issue with resource:',
     // Accessibility
     backToResources: 'Back to all resources',
     callPhone: 'Call phone number',
@@ -131,6 +133,8 @@ const content = {
     cancel: 'Cancelar',
     delete: 'Eliminar',
     optional: 'Opcional',
+    reportIssue: 'Reportar un problema',
+    reportIssueSubject: 'Problema con recurso:',
     // Accessibility
     backToResources: 'Volver a todos los recursos',
     callPhone: 'Llamar al número de teléfono',
@@ -263,8 +267,8 @@ export default function ResourceDetailClient({ resource }: Props) {
 
         {/* About */}
         <div className="card-flat mt-6">
-          <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{t.about}</h2>
-          <p className="text-gray-700 leading-relaxed">{description}</p>
+          <h2 className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-2">{t.about}</h2>
+          <p className="text-[var(--color-text)] leading-relaxed">{description}</p>
         </div>
 
         {/* Action Buttons */}
@@ -302,8 +306,8 @@ export default function ResourceDetailClient({ resource }: Props) {
         <div className="mt-8 space-y-5">
           {resource.address && (
             <div>
-              <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">{t.location}</h2>
-              <p className="text-gray-800">
+              <h2 className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1">{t.location}</h2>
+              <p className="text-[var(--color-text)]">
                 {resource.address}<br />
                 {resource.city}, {resource.state} {resource.zip}
               </p>
@@ -313,16 +317,16 @@ export default function ResourceDetailClient({ resource }: Props) {
           <div className="grid grid-cols-2 gap-5">
             {resource.phone && (
               <div>
-                <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">{t.phone}</h2>
-                <a href={`tel:${resource.phone.replace(/\D/g, '')}`} className="text-[hsl(var(--color-primary))] font-medium">
+                <h2 className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1">{t.phone}</h2>
+                <a href={`tel:${resource.phone.replace(/\D/g, '')}`} className="text-[var(--color-primary)] font-medium">
                   {resource.phone}
                 </a>
               </div>
             )}
             {resource.email && (
               <div>
-                <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">{t.email}</h2>
-                <a href={`mailto:${resource.email}`} className="text-[hsl(var(--color-primary))] font-medium break-all text-sm">
+                <h2 className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1">{t.email}</h2>
+                <a href={`mailto:${resource.email}`} className="text-[var(--color-primary)] font-medium break-all text-sm">
                   {resource.email}
                 </a>
               </div>
@@ -331,19 +335,19 @@ export default function ResourceDetailClient({ resource }: Props) {
 
           {resource.hours && (
             <div>
-              <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">{t.hours}</h2>
-              <p className="text-gray-800 whitespace-pre-line">{resource.hours}</p>
+              <h2 className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1">{t.hours}</h2>
+              <p className="text-[var(--color-text)] whitespace-pre-line">{resource.hours}</p>
             </div>
           )}
 
           {resource.website && (
             <div>
-              <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">{t.website}</h2>
+              <h2 className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1">{t.website}</h2>
               <a
                 href={resource.website}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[hsl(var(--color-primary))] font-medium break-all"
+                className="text-[var(--color-primary)] font-medium break-all"
               >
                 {resource.website.replace(/^https?:\/\//, '')}
               </a>
@@ -366,23 +370,23 @@ export default function ResourceDetailClient({ resource }: Props) {
           {/* Eligibility */}
           {eligibility && Object.keys(eligibility).length > 0 && (
             <div>
-              <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{t.whoCanGetHelp}</h2>
-              <ul className="text-gray-800 space-y-1 text-sm">
+              <h2 className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-2">{t.whoCanGetHelp}</h2>
+              <ul className="text-[var(--color-text)] space-y-1 text-sm">
                 {Array.isArray(eligibility.housingStatus) && eligibility.housingStatus.length > 0 && (
                   <li className="flex items-start gap-2">
-                    <span className="text-[hsl(var(--color-primary))]">•</span>
+                    <span className="text-[var(--color-primary)]">•</span>
                     <span>{eligibility.housingStatus.map((s: string) => translateHousing(s)).join(', ')}</span>
                   </li>
                 )}
                 {Array.isArray(eligibility.populations) && eligibility.populations.length > 0 && (
                   <li className="flex items-start gap-2">
-                    <span className="text-[hsl(var(--color-primary))]">•</span>
+                    <span className="text-[var(--color-primary)]">•</span>
                     <span>{t.serves} {eligibility.populations.map((p: string) => translatePopulation(p)).join(', ')}</span>
                   </li>
                 )}
                 {typeof eligibility.incomeLimitPctFpl === 'number' && (
                   <li className="flex items-start gap-2">
-                    <span className="text-[hsl(var(--color-primary))]">•</span>
+                    <span className="text-[var(--color-primary)]">•</span>
                     <span>{t.incomeLimit} {eligibility.incomeLimitPctFpl}{t.ofFPL}</span>
                   </li>
                 )}
@@ -412,18 +416,18 @@ export default function ResourceDetailClient({ resource }: Props) {
         )}
 
         {/* Share & Track */}
-        <div className="mt-8 pt-6 border-t border-[hsl(var(--color-border))] flex gap-3">
+        <div className="mt-8 pt-6 border-t border-[var(--color-border)] flex gap-3">
           <ShareButton title={name} text={description} />
           <button
             onClick={handleOpenModal}
-            className={`btn-secondary flex-1 flex items-center justify-center gap-2 ${existingEntry ? 'bg-green-50 border-green-200' : ''}`}
+            className={`btn-secondary flex-1 flex items-center justify-center gap-2 ${existingEntry ? 'bg-[var(--color-success-light)] border-[var(--color-success)]' : ''}`}
           >
             {existingEntry ? (
               <>
-                <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-5 h-5 text-[var(--color-success)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                <span className="text-green-700">{t.tracked}</span>
+                <span className="text-[var(--color-success)]">{t.tracked}</span>
               </>
             ) : (
               <>
@@ -552,10 +556,22 @@ export default function ResourceDetailClient({ resource }: Props) {
           </div>
         )}
 
-        {/* Verification */}
-        <p className="mt-4 text-xs text-gray-400">
-          {t.lastVerified}: {resource.verifiedAt ? new Date(resource.verifiedAt).toLocaleDateString() : t.notVerified}
-        </p>
+        {/* Verification & Report */}
+        <div className="mt-4 flex items-center justify-between">
+          <p className="text-xs text-[var(--color-text-muted)]">
+            {t.lastVerified}: {resource.verifiedAt ? new Date(resource.verifiedAt).toLocaleDateString() : t.notVerified}
+          </p>
+          <a
+            href={`mailto:pmcgovern@bowerycap.com?subject=${encodeURIComponent(`${t.reportIssueSubject} ${resource.name}`)}&body=${encodeURIComponent(`Resource: ${resource.name}\nID: ${resource.id}\n\nIssue:\n`)}`}
+            className="text-xs font-medium flex items-center gap-1 btn-touch"
+            style={{ color: 'var(--color-text-muted)' }}
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            {t.reportIssue}
+          </a>
+        </div>
       </main>
     </div>
   )

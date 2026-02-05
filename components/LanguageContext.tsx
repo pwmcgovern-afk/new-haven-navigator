@@ -20,12 +20,14 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     const saved = localStorage.getItem('language') as Language
     if (saved && (saved === 'en' || saved === 'es')) {
       setLanguageState(saved)
+      document.documentElement.lang = saved
     }
   }, [])
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang)
     localStorage.setItem('language', lang)
+    document.documentElement.lang = lang
   }
 
   const t = (key: keyof typeof translations.en) => getTranslation(language, key)

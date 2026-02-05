@@ -8,13 +8,30 @@ export const metadata: Metadata = {
   title: 'New Haven Navigator',
   description: 'Find social services, benefits, and resources in New Haven, CT',
   manifest: '/manifest.json',
+  icons: {
+    icon: '/favicon.png',
+    apple: '/apple-touch-icon.png',
+  },
+  openGraph: {
+    title: 'New Haven Navigator',
+    description: 'Find social services, benefits, and resources in New Haven, CT',
+    url: 'https://new-haven-navigator.vercel.app',
+    siteName: 'New Haven Navigator',
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'New Haven Navigator',
+    description: 'Find social services, benefits, and resources in New Haven, CT',
+  },
 }
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
-  themeColor: '#2563eb',
+  themeColor: '#0D6E6E',
 }
 
 export default function RootLayout({

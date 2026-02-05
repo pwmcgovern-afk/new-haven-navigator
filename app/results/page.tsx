@@ -66,11 +66,11 @@ export default function ResultsPage({
     <Suspense fallback={
       <div className="px-5 py-8">
         <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded-lg w-48 mb-4" />
-          <div className="h-4 bg-gray-200 rounded w-32 mb-8" />
+          <div className="h-8 bg-[var(--color-border)] rounded-lg w-48 mb-4" />
+          <div className="h-4 bg-[var(--color-border)] rounded w-32 mb-8" />
           <div className="space-y-4">
             {[1, 2, 3].map(i => (
-              <div key={i} className="h-32 bg-gray-200 rounded-2xl" />
+              <div key={i} className="h-32 bg-[var(--color-border)] rounded-2xl" />
             ))}
           </div>
         </div>

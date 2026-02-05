@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useLanguage } from '@/components/LanguageContext'
@@ -176,16 +176,33 @@ export default function WizardPage() {
   const { language } = useLanguage()
   const t = content[language]
 
-  const [currentStep, setCurrentStep] = useState<Step>('location')
-  const [data, setData] = useState<WizardData>({
-    zipCode: '',
-    householdSize: 1,
-    monthlyIncome: 0,
-    housingStatus: '',
-    insuranceStatus: '',
-    populations: [],
-    categoriesNeeded: []
+  const [currentStep, setCurrentStep] = useState<Step>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('wizardStep')
+      if (saved && STEPS.includes(saved as Step)) return saved as Step
+    }
+    return 'location'
   })
+  const [data, setData] = useState<WizardData>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('wizardData')
+      if (saved) try { return JSON.parse(saved) } catch {}
+    }
+    return {
+      zipCode: '',
+      householdSize: 1,
+      monthlyIncome: 0,
+      housingStatus: '',
+      insuranceStatus: '',
+      populations: [],
+      categoriesNeeded: []
+    }
+  })
+
+  useEffect(() => {
+    sessionStorage.setItem('wizardData', JSON.stringify(data))
+    sessionStorage.setItem('wizardStep', currentStep)
+  }, [data, currentStep])
 
   const stepIndex = STEPS.indexOf(currentStep)
   const progress = ((stepIndex + 1) / STEPS.length) * 100

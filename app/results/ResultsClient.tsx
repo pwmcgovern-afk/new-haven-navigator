@@ -92,9 +92,9 @@ export default function ResultsClient({ resources, selectedCategories }: Props) 
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-[hsl(var(--color-bg))] border-b border-[hsl(var(--color-border))] px-5 py-4">
+      <header className="sticky top-0 z-10 bg-[var(--color-bg)] border-b border-[var(--color-border)] px-5 py-4">
         <div className="flex items-center justify-between">
-          <Link href="/wizard" className="text-[hsl(var(--color-primary))] text-sm font-medium inline-flex items-center">
+          <Link href="/wizard" className="text-[var(--color-primary)] text-sm font-medium inline-flex items-center">
             <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
@@ -107,7 +107,7 @@ export default function ResultsClient({ resources, selectedCategories }: Props) 
       <main className="px-5 py-6 fade-in">
         {/* Title */}
         <h1 className="text-2xl font-semibold mb-1">{t.title}</h1>
-        <p className="text-gray-500 mb-6">
+        <p className="text-[var(--color-text-secondary)] mb-6">
           {resources.length} {resources.length !== 1 ? t.resourcesMatch : t.resourceMatch}
         </p>
 
@@ -139,25 +139,25 @@ export default function ResultsClient({ resources, selectedCategories }: Props) 
                       {resource.categories.slice(0, 2).map((cat) => {
                         const catInfo = getCatInfo(cat)
                         return (
-                          <span key={cat} className="text-xs text-gray-500">
+                          <span key={cat} className="text-xs text-[var(--color-text-secondary)]">
                             {catInfo?.icon} {catInfo?.name}
                           </span>
                         )
                       })}
                     </div>
                     {resource.score >= 70 && (
-                      <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+                      <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ color: 'var(--color-success)', background: 'var(--color-success-light)' }}>
                         {t.goodMatch}
                       </span>
                     )}
                   </div>
                   <h3 className="font-semibold text-[15px] mb-1">{name}</h3>
                   {resource.organization && resource.organization !== resource.name && (
-                    <p className="text-sm text-gray-500 mb-2">{resource.organization}</p>
+                    <p className="text-sm text-[var(--color-text-secondary)] mb-2">{resource.organization}</p>
                   )}
-                  <p className="text-sm text-gray-600 line-clamp-2">{description}</p>
+                  <p className="text-sm text-[var(--color-text-secondary)] line-clamp-2">{description}</p>
                   {resource.phone && (
-                    <p className="text-sm text-[hsl(var(--color-primary))] mt-2 font-medium">{resource.phone}</p>
+                    <p className="text-sm text-[var(--color-primary)] mt-2 font-medium">{resource.phone}</p>
                   )}
                 </Link>
               )
@@ -167,7 +167,7 @@ export default function ResultsClient({ resources, selectedCategories }: Props) 
           <div className="text-center py-16">
             <div className="text-5xl mb-4">🔍</div>
             <h2 className="text-xl font-semibold mb-2">{t.noMatches}</h2>
-            <p className="text-gray-500 mb-6">{t.noMatchesDesc}</p>
+            <p className="text-[var(--color-text-secondary)] mb-6">{t.noMatchesDesc}</p>
             <div className="flex gap-3 justify-center">
               <Link href="/wizard" className="btn-secondary">{t.tryAgain}</Link>
               <Link href="/resources" className="btn-primary">{t.browseAll}</Link>
@@ -177,7 +177,7 @@ export default function ResultsClient({ resources, selectedCategories }: Props) 
 
         {/* Call 211 CTA */}
         <div className="mt-8 cta-card">
-          <p className="text-sm text-gray-600 mb-3">{t.needMoreHelp}</p>
+          <p className="text-sm text-[var(--color-text-secondary)] mb-3">{t.needMoreHelp}</p>
           <a href="tel:211" className="btn-phone">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />

@@ -88,10 +88,10 @@ export default function CategoryClient({ slug, resources }: Props) {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-[hsl(var(--color-bg))] border-b border-[hsl(var(--color-border))] px-5 py-4">
+      <header className="sticky top-0 z-10 bg-[var(--color-bg)] border-b border-[var(--color-border)] px-5 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link href="/" className="text-gray-500 hover:text-gray-900 transition-colors">
+            <Link href="/" className="text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors">
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
@@ -105,7 +105,7 @@ export default function CategoryClient({ slug, resources }: Props) {
 
       <main className="px-5 py-6 fade-in">
         {/* Results count */}
-        <p className="text-sm text-gray-500 mb-4">
+        <p className="text-sm text-[var(--color-text-secondary)] mb-4">
           {resources.length} {resources.length !== 1 ? t.resources : t.resource} {t.inCategory} {category.name}
         </p>
 
@@ -120,11 +120,11 @@ export default function CategoryClient({ slug, resources }: Props) {
                 <Link key={resource.id} href={`/resources/${resource.id}`} className="card block">
                   <h3 className="font-semibold text-[15px] mb-1">{name}</h3>
                   {resource.organization && resource.organization !== resource.name && (
-                    <p className="text-sm text-gray-500 mb-2">{resource.organization}</p>
+                    <p className="text-sm text-[var(--color-text-secondary)] mb-2">{resource.organization}</p>
                   )}
-                  <p className="text-sm text-gray-600 line-clamp-2">{description}</p>
+                  <p className="text-sm text-[var(--color-text-secondary)] line-clamp-2">{description}</p>
                   {resource.phone && (
-                    <p className="text-sm text-[hsl(var(--color-primary))] mt-2 font-medium">{resource.phone}</p>
+                    <p className="text-sm text-[var(--color-primary)] mt-2 font-medium">{resource.phone}</p>
                   )}
                 </Link>
               )
@@ -134,7 +134,7 @@ export default function CategoryClient({ slug, resources }: Props) {
           <div className="text-center py-16">
             <div className="text-5xl mb-4">{category.icon}</div>
             <h2 className="text-xl font-semibold mb-2">{t.noResources}</h2>
-            <p className="text-gray-500 mb-6">
+            <p className="text-[var(--color-text-secondary)] mb-6">
               {t.stillAdding} {category.name.toLowerCase()} {t.resourcesWord}
             </p>
             <Link href="/resources" className="btn-secondary">{t.browseAll}</Link>
@@ -143,7 +143,7 @@ export default function CategoryClient({ slug, resources }: Props) {
 
         {/* Call 211 CTA */}
         <div className="mt-8 cta-card">
-          <p className="text-sm text-gray-600 mb-3">
+          <p className="text-sm text-[var(--color-text-secondary)] mb-3">
             {t.needHelp} {category.name.toLowerCase()}?
           </p>
           <a href="tel:211" className="btn-phone">

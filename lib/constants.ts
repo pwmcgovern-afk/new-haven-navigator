@@ -1,23 +1,23 @@
-// 2024 Federal Poverty Level guidelines (annual income)
+// 2026 Federal Poverty Level guidelines (annual income)
 // Source: https://aspe.hhs.gov/topics/poverty-economic-mobility/poverty-guidelines
-export const FPL_2024 = {
-  1: 15060,
-  2: 20440,
-  3: 25820,
-  4: 31200,
-  5: 36580,
-  6: 41960,
-  7: 47340,
-  8: 52720,
-  // Add $5,380 for each additional person
-  additionalPerson: 5380,
+export const FPL_2026 = {
+  1: 15960,
+  2: 21640,
+  3: 27320,
+  4: 33000,
+  5: 38680,
+  6: 44360,
+  7: 50040,
+  8: 55720,
+  // Add $5,680 for each additional person
+  additionalPerson: 5680,
 }
 
 export function getFPL(householdSize: number): number {
   if (householdSize <= 8) {
-    return FPL_2024[householdSize as keyof typeof FPL_2024] as number
+    return FPL_2026[householdSize as keyof typeof FPL_2026] as number
   }
-  return FPL_2024[8] + (householdSize - 8) * FPL_2024.additionalPerson
+  return FPL_2026[8] + (householdSize - 8) * FPL_2026.additionalPerson
 }
 
 export function calculatePctFPL(annualIncome: number, householdSize: number): number {
