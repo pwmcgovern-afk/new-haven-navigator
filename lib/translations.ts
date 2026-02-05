@@ -122,6 +122,14 @@ export const translations = {
     // Crisis Banner
     crisisCall: 'In crisis? Call 988',
     crisisLine: 'Suicide & Crisis Lifeline',
+
+    // Chat Assistant
+    chatAssistant: 'Resource Assistant',
+    chatPlaceholder: 'Ask about services...',
+    chatSend: 'Send',
+    chatOpen: 'Open chat assistant',
+    chatClose: 'Close chat assistant',
+    chatWelcome: 'Hi! I can help you find social services in New Haven. What kind of help are you looking for?',
   },
 
   es: {
@@ -245,6 +253,14 @@ export const translations = {
     // Crisis Banner
     crisisCall: '¿En crisis? Llame al 988',
     crisisLine: 'Línea de Prevención del Suicidio',
+
+    // Chat Assistant
+    chatAssistant: 'Asistente de Recursos',
+    chatPlaceholder: 'Pregunte sobre servicios...',
+    chatSend: 'Enviar',
+    chatOpen: 'Abrir asistente de chat',
+    chatClose: 'Cerrar asistente de chat',
+    chatWelcome: '¡Hola! Puedo ayudarle a encontrar servicios sociales en New Haven. ¿Qué tipo de ayuda necesita?',
   }
 }
 

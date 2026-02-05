@@ -4,6 +4,7 @@ import { LanguageProvider } from '@/components/LanguageContext'
 import { TrackerProvider } from '@/components/TrackerContext'
 import CrisisBanner from '@/components/CrisisBanner'
 import AppFooter from '@/components/AppFooter'
+import ChatWidget from '@/components/ChatWidget'
 
 export const metadata: Metadata = {
   title: 'New Haven Navigator',
@@ -50,6 +51,7 @@ export default function RootLayout({
               {children}
               <AppFooter />
             </main>
+            <ChatWidget />
           </TrackerProvider>
         </LanguageProvider>
       </body>

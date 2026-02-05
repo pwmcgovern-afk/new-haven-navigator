@@ -69,6 +69,7 @@
     font-size: 100%; /* Respect user's browser settings */
     -webkit-tap-highlight-color: transparent;
     scroll-behavior: smooth;
+    color-scheme: light;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -595,6 +596,40 @@
 
   .btn-touch:focus-visible {
     box-shadow: var(--focus-ring);
+  }
+
+  /* ============================================
+     CHAT WIDGET
+     ============================================ */
+
+  .chat-panel {
+    animation: chatSlideUp 0.25s ease-out;
+  }
+
+  @keyframes chatSlideUp {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .chat-typing-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    opacity: 0.4;
+    animation: chatTyping 1.2s infinite;
+  }
+
+  @keyframes chatTyping {
+    0%, 60%, 100% { opacity: 0.4; transform: translateY(0); }
+    30% { opacity: 1; transform: translateY(-4px); }
   }
 }
 
