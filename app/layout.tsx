@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { LanguageProvider } from '@/components/LanguageContext'
 import { TrackerProvider } from '@/components/TrackerContext'
+import CrisisBanner from '@/components/CrisisBanner'
 
 export const metadata: Metadata = {
   title: 'New Haven Navigator',
@@ -27,6 +28,7 @@ export default function RootLayout({
         <LanguageProvider>
           <TrackerProvider>
             <main className="max-w-lg mx-auto">
+              <CrisisBanner />
               {children}
             </main>
           </TrackerProvider>

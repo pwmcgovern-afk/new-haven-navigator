@@ -118,6 +118,10 @@ export const translations = {
 
     // Open Now
     openNow: 'Open Now',
+
+    // Crisis Banner
+    crisisCall: 'In crisis? Call 988',
+    crisisLine: 'Suicide & Crisis Lifeline',
   },
 
   es: {
@@ -237,6 +241,10 @@ export const translations = {
 
     // Open Now
     openNow: 'Abierto Ahora',
+
+    // Crisis Banner
+    crisisCall: '¿En crisis? Llame al 988',
+    crisisLine: 'Línea de Prevención del Suicidio',
   }
 }
 
