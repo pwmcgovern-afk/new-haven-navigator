@@ -4,8 +4,8 @@ import { prisma } from '@/lib/db'
 
 // Simple in-memory rate limiter (per-IP, resets on server restart)
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
-const RATE_LIMIT = 20 // requests per window
-const RATE_WINDOW_MS = 60 * 60 * 1000 // 1 hour
+const RATE_LIMIT = 20
+const RATE_WINDOW_MS = 60 * 60 * 1000
 
 function isRateLimited(ip: string): boolean {
   const now = Date.now()
@@ -20,11 +20,27 @@ function isRateLimited(ip: string): boolean {
   return entry.count > RATE_LIMIT
 }
 
-// Cache resource list in memory (refreshes every hour)
-let cachedResources: string | null = null
+// Cached resource data (refreshes every hour)
+interface CachedResource {
+  id: string
+  name: string
+  nameEs: string | null
+  organization: string | null
+  description: string
+  descriptionEs: string | null
+  categories: string[]
+  phone: string | null
+  address: string | null
+  hours: string | null
+  website: string | null
+  // Lowercase searchable text for keyword matching
+  searchText: string
+}
+
+let cachedResources: CachedResource[] | null = null
 let cacheExpiry = 0
 
-async function getResourceContext(): Promise<string> {
+async function getAllResources(): Promise<CachedResource[]> {
   const now = Date.now()
   if (cachedResources && now < cacheExpiry) {
     return cachedResources
@@ -46,31 +62,88 @@ async function getResourceContext(): Promise<string> {
     },
   })
 
-  cachedResources = resources
-    .map((r) => {
-      const parts = [
-        r.id,
-        r.name,
-        r.nameEs || '',
-        r.organization || '',
-        r.categories.join(','),
-        r.description.slice(0, 200),
-        (r.descriptionEs || '').slice(0, 200),
-        r.phone || '',
-        r.address || '',
-        r.hours || '',
-      ]
-      return parts.join('|')
-    })
-    .join('\n')
+  cachedResources = resources.map(r => ({
+    ...r,
+    searchText: [
+      r.name,
+      r.nameEs,
+      r.organization,
+      r.description,
+      r.descriptionEs,
+      ...r.categories,
+    ].filter(Boolean).join(' ').toLowerCase()
+  }))
 
-  cacheExpiry = now + 60 * 60 * 1000 // 1 hour
+  cacheExpiry = now + 60 * 60 * 1000
   return cachedResources
+}
+
+// Select resources most relevant to the user's query
+function selectRelevantResources(
+  query: string,
+  allResources: CachedResource[],
+  maxResults: number = 25
+): CachedResource[] {
+  const queryWords = query.toLowerCase()
+    .replace(/[^\w\sáéíóúñü]/g, '')
+    .split(/\s+/)
+    .filter(w => w.length > 2)
+
+  if (queryWords.length === 0) {
+    // No meaningful keywords — return a diverse sample
+    return allResources.slice(0, maxResults)
+  }
+
+  // Score each resource by keyword match count
+  const scored = allResources.map(resource => {
+    let score = 0
+    for (const word of queryWords) {
+      if (resource.searchText.includes(word)) {
+        score++
+        // Boost for name/category matches
+        if (resource.name.toLowerCase().includes(word)) score += 2
+        if (resource.categories.some(c => c.includes(word))) score += 2
+      }
+    }
+    return { resource, score }
+  })
+
+  // Return top matches (scored > 0), plus a few extras for breadth
+  const matches = scored
+    .filter(s => s.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, maxResults)
+    .map(s => s.resource)
+
+  // If very few matches, pad with some general resources
+  if (matches.length < 5) {
+    const matchIds = new Set(matches.map(m => m.id))
+    const extras = allResources
+      .filter(r => !matchIds.has(r.id))
+      .slice(0, 10)
+    return [...matches, ...extras].slice(0, maxResults)
+  }
+
+  return matches
+}
+
+function formatResourceForPrompt(r: CachedResource): string {
+  return [
+    r.id,
+    r.name,
+    r.nameEs || '',
+    r.organization || '',
+    r.categories.join(','),
+    r.description.slice(0, 200),
+    (r.descriptionEs || '').slice(0, 200),
+    r.phone || '',
+    r.address || '',
+    r.hours || '',
+  ].join('|')
 }
 
 export async function POST(req: Request) {
   try {
-    // Rate limiting
     const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
       || req.headers.get('x-real-ip')
       || 'unknown'
@@ -82,7 +155,6 @@ export async function POST(req: Request) {
       )
     }
 
-    // Parse and validate input
     const body = await req.json()
     const { messages, language = 'en' } = body
 
@@ -100,10 +172,17 @@ export async function POST(req: Request) {
       )
     }
 
-    // Cap conversation history to prevent unbounded token growth
     const recentMessages = messages.slice(-20)
 
-    const resourceList = await getResourceContext()
+    // Extract the user's latest query for keyword matching
+    const lastUserMessage = [...recentMessages]
+      .reverse()
+      .find(m => m.role === 'user')?.content || ''
+
+    const allResources = await getAllResources()
+    const relevantResources = selectRelevantResources(lastUserMessage, allResources)
+    const resourceList = relevantResources.map(formatResourceForPrompt).join('\n')
+
     const isSpanish = language === 'es'
 
     const systemPrompt = `You are a helpful assistant for New Haven Navigator, a social services directory for New Haven, CT residents.
@@ -119,7 +198,7 @@ RULES:
 - If no matching resource exists, suggest calling 211 for additional help.
 - Be warm, direct, and non-judgmental.
 
-RESOURCE DATABASE (id|name|nameEs|org|categories|description|descriptionEs|phone|address|hours):
+RESOURCE DATABASE (${relevantResources.length} most relevant of ${allResources.length} total — id|name|nameEs|org|categories|description|descriptionEs|phone|address|hours):
 ${resourceList}`
 
     const result = streamText({

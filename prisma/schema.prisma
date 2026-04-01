@@ -80,3 +80,12 @@ model Category {
   icon         String?
   displayOrder Int    @default(0)
 }
+
+model Feedback {
+  id         String   @id @default(uuid())
+  resourceId String
+  helpful    Boolean
+  createdAt  DateTime @default(now())
+
+  @@index([resourceId])
+}

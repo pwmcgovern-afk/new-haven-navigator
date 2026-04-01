@@ -11,6 +11,8 @@ import type { TrackerStatus } from '@/lib/trackerTypes'
 import { getCategoryInfo } from '@/lib/categories'
 import type { Resource } from '@/lib/types'
 import TrackerModal from './TrackerModal'
+import ResourceFeedback from '@/components/ResourceFeedback'
+import FreshnessBadge from '@/components/FreshnessBadge'
 
 const ResourceMap = dynamic(() => import('@/components/ResourceMap'), { ssr: false })
 
@@ -405,11 +407,12 @@ export default function ResourceDetailClient({ resource }: Props) {
           }}
         />
 
+        {/* Feedback */}
+        <ResourceFeedback resourceId={resource.id} />
+
         {/* Verification & Report */}
         <div className="mt-4 flex items-center justify-between">
-          <p className="text-xs text-[var(--color-text-muted)]">
-            {t.lastVerified}: {resource.verifiedAt ? new Date(resource.verifiedAt).toLocaleDateString() : t.notVerified}
-          </p>
+          <FreshnessBadge verifiedAt={resource.verifiedAt} />
           <a
             href={`mailto:pwmcgovern@gmail.com?subject=${encodeURIComponent(`${t.reportIssueSubject} ${resource.name}`)}&body=${encodeURIComponent(`Resource: ${resource.name}\nID: ${resource.id}\n\nIssue:\n`)}`}
             className="text-xs font-medium flex items-center gap-1 btn-touch"
