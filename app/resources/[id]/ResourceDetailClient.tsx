@@ -433,7 +433,7 @@ export default function ResourceDetailClient({ resource }: Props) {
 
         {/* Share & Track */}
         <div className="mt-8 pt-6 border-t border-[var(--color-border)] flex gap-3">
-          <ShareButton title={name} text={description} />
+          <ShareButton title={name} text={description} phone={resource.phone} />
           <button
             onClick={handleOpenModal}
             className={`btn-secondary flex-1 flex items-center justify-center gap-2 ${existingEntry ? 'bg-[var(--color-success-light)] border-[var(--color-success)]' : ''}`}

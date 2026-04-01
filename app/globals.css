@@ -773,26 +773,60 @@
    PRINT STYLES - For users who need to print
    ============================================ */
 
+/* Utility to hide elements when printing */
+.print-hide {
+  /* visible on screen */
+}
+
 @media print {
   .btn-primary,
   .btn-secondary,
   .btn-phone,
   .btn-outline-lg,
   .lang-toggle,
+  .print-hide,
+  .cta-card,
+  .category-pill,
   header,
-  footer {
+  footer,
+  nav[aria-label] {
     display: none !important;
   }
 
   body {
     background: white;
     color: black;
-    font-size: 12pt;
+    font-size: 11pt;
+    line-height: 1.4;
+  }
+
+  .max-w-lg {
+    max-width: 100% !important;
   }
 
   .card,
   .card-flat {
     border: 1px solid #ccc;
     break-inside: avoid;
+    padding: 8pt;
+    margin-bottom: 6pt;
+    box-shadow: none !important;
+  }
+
+  /* Show phone numbers prominently */
+  .text-\[var\(--color-primary\)\] {
+    color: black !important;
+    font-weight: bold;
+  }
+
+  a {
+    color: black !important;
+    text-decoration: none !important;
+  }
+
+  /* Ensure resource cards show all info */
+  .line-clamp-2 {
+    -webkit-line-clamp: unset !important;
+    overflow: visible !important;
   }
 }

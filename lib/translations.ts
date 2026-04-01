@@ -141,7 +141,8 @@ export const translations = {
     browseResources: 'Browse resources',
 
     // Share
-    shareResource: 'Share this resource',
+    shareResource: 'Share',
+    textResource: 'Text',
 
     // Footer
     contactAdmin: 'Contact the admin',
@@ -149,6 +150,9 @@ export const translations = {
     // Chat errors
     chatError: 'Something went wrong. Please try again.',
     chatRetry: 'Retry',
+
+    // Print
+    printList: 'Print list',
   },
 
   es: {
@@ -291,7 +295,8 @@ export const translations = {
     browseResources: 'Ver recursos',
 
     // Share
-    shareResource: 'Compartir este recurso',
+    shareResource: 'Compartir',
+    textResource: 'Mensaje',
 
     // Footer
     contactAdmin: 'Contactar al administrador',
@@ -299,6 +304,9 @@ export const translations = {
     // Chat errors
     chatError: 'Algo salio mal. Por favor intente de nuevo.',
     chatRetry: 'Reintentar',
+
+    // Print
+    printList: 'Imprimir lista',
   }
 }
 

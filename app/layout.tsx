@@ -6,6 +6,7 @@ import CrisisBanner from '@/components/CrisisBanner'
 import AppFooter from '@/components/AppFooter'
 import ChatWidget from '@/components/ChatWidget'
 import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration'
+import { Analytics } from '@vercel/analytics/react'
 
 export const metadata: Metadata = {
   title: 'New Haven Navigator',
@@ -55,6 +56,7 @@ export default function RootLayout({
             <ChatWidget />
             <ServiceWorkerRegistration />
           </TrackerProvider>
+          <Analytics />
         </LanguageProvider>
       </body>
     </html>

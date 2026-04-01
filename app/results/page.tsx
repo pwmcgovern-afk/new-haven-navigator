@@ -24,7 +24,11 @@ async function ResultsContent({ searchParams }: { searchParams: SearchParams }) 
     categoriesNeeded: searchParams.categories?.split(',').filter(Boolean) || []
   }
 
+  // Filter at DB level by selected categories to avoid loading all resources
   const dbResources = await prisma.resource.findMany({
+    where: userProfile.categoriesNeeded.length > 0
+      ? { categories: { hasSome: userProfile.categoriesNeeded } }
+      : {},
     select: {
       id: true,
       name: true,
