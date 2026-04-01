@@ -1,15 +1,15 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import ShareButton from '@/components/ShareButton'
 import LanguageToggle from '@/components/LanguageToggle'
 import { useLanguage } from '@/components/LanguageContext'
 import { useTracker } from '@/components/TrackerContext'
-import { statusConfig, type TrackerStatus } from '@/lib/trackerTypes'
 import { getCategoryInfo } from '@/lib/categories'
 import type { Resource } from '@/lib/types'
+import TrackerModal from './TrackerModal'
 
 const ResourceMap = dynamic(() => import('@/components/ResourceMap'), { ssr: false })
 
@@ -45,10 +45,8 @@ const content = {
     seniors: 'Seniors (60+)',
     disabled: 'People with disabilities',
     domestic_violence: 'DV survivors',
-    // Tracker
     track: 'Track',
     tracked: 'Tracked',
-    updateTracking: 'Update',
     editTracking: 'Edit Tracking',
     contactPerson: 'Contact Person',
     dateContacted: 'Date Contacted',
@@ -60,7 +58,6 @@ const content = {
     optional: 'Optional',
     reportIssue: 'Report an issue',
     reportIssueSubject: 'Issue with resource:',
-    // Accessibility
     backToResources: 'Back to all resources',
     callPhone: 'Call phone number',
     getDirections: 'Get directions to location',
@@ -93,10 +90,8 @@ const content = {
     seniors: 'Personas mayores (60+)',
     disabled: 'Personas con discapacidades',
     domestic_violence: 'Sobrevivientes de VD',
-    // Tracker
     track: 'Rastrear',
     tracked: 'Rastreado',
-    updateTracking: 'Actualizar',
     editTracking: 'Editar Seguimiento',
     contactPerson: 'Persona de Contacto',
     dateContacted: 'Fecha de Contacto',
@@ -108,7 +103,6 @@ const content = {
     optional: 'Opcional',
     reportIssue: 'Reportar un problema',
     reportIssueSubject: 'Problema con recurso:',
-    // Accessibility
     backToResources: 'Volver a todos los recursos',
     callPhone: 'Llamar al número de teléfono',
     getDirections: 'Obtener direcciones a la ubicación',
@@ -122,102 +116,16 @@ export default function ResourceDetailClient({ resource }: Props) {
   const { getEntryByResourceId, addEntry, updateEntry, deleteEntry } = useTracker()
 
   const [showTrackModal, setShowTrackModal] = useState(false)
-  const modalRef = useRef<HTMLDivElement>(null)
   const existingEntry = getEntryByResourceId(resource.id)
-
-  // Focus trap and escape key for tracker modal
-  useEffect(() => {
-    if (!showTrackModal) return
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setShowTrackModal(false)
-        return
-      }
-
-      if (e.key === 'Tab' && modalRef.current) {
-        const focusable = modalRef.current.querySelectorAll<HTMLElement>(
-          'button, input, textarea, [tabindex]:not([tabindex="-1"])'
-        )
-        const first = focusable[0]
-        const last = focusable[focusable.length - 1]
-
-        if (e.shiftKey && document.activeElement === first) {
-          e.preventDefault()
-          last?.focus()
-        } else if (!e.shiftKey && document.activeElement === last) {
-          e.preventDefault()
-          first?.focus()
-        }
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown)
-    // Focus the first interactive element
-    const firstInput = modalRef.current?.querySelector<HTMLElement>('button, input')
-    firstInput?.focus()
-
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [showTrackModal])
-
-  const [formStatus, setFormStatus] = useState<TrackerStatus>(existingEntry?.status || 'reached_out')
-  const [formContact, setFormContact] = useState(existingEntry?.contactPerson || '')
-  const [formDate, setFormDate] = useState(existingEntry?.dateContacted || new Date().toISOString().split('T')[0])
-  const [formNotes, setFormNotes] = useState(existingEntry?.notes || '')
-
-  const resetForm = () => {
-    setFormStatus(existingEntry?.status || 'reached_out')
-    setFormContact(existingEntry?.contactPerson || '')
-    setFormDate(existingEntry?.dateContacted || new Date().toISOString().split('T')[0])
-    setFormNotes(existingEntry?.notes || '')
-  }
-
-  const handleOpenModal = () => {
-    resetForm()
-    setShowTrackModal(true)
-  }
-
-  const handleSave = () => {
-    const name = language === 'es' && resource.nameEs ? resource.nameEs : resource.name
-    if (existingEntry) {
-      updateEntry(existingEntry.id, {
-        status: formStatus,
-        contactPerson: formContact,
-        dateContacted: formDate,
-        notes: formNotes
-      })
-    } else {
-      addEntry({
-        resourceId: resource.id,
-        resourceName: resource.name,
-        resourceNameEs: resource.nameEs || undefined,
-        organizationName: resource.organization || undefined,
-        status: formStatus,
-        contactPerson: formContact,
-        dateContacted: formDate,
-        notes: formNotes
-      })
-    }
-    setShowTrackModal(false)
-  }
-
-  const handleDelete = () => {
-    if (existingEntry) {
-      deleteEntry(existingEntry.id)
-      setShowTrackModal(false)
-    }
-  }
 
   const getCatInfo = (slug: string) => getCategoryInfo(slug, language)
 
-  // Use organization-specific tips
   const tips = language === 'es' && resource.tipsEs?.length > 0
     ? resource.tipsEs
     : resource.tips?.length > 0
       ? resource.tips
       : []
 
-  // Use Spanish translations when available
   const name = language === 'es' && resource.nameEs ? resource.nameEs : resource.name
   const description = language === 'es' && resource.descriptionEs ? resource.descriptionEs : resource.description
   const howToApply = language === 'es' && resource.howToApplyEs ? resource.howToApplyEs : resource.howToApply
@@ -229,9 +137,30 @@ export default function ResourceDetailClient({ resource }: Props) {
     : null
 
   const eligibility = resource.eligibility
-
   const translateHousing = (s: string) => t[s as keyof typeof t] || s
   const translatePopulation = (p: string) => t[p as keyof typeof t] || p
+
+  const handleSave = (formData: { status: string; contactPerson: string; dateContacted: string; notes: string }) => {
+    if (existingEntry) {
+      updateEntry(existingEntry.id, formData)
+    } else {
+      addEntry({
+        resourceId: resource.id,
+        resourceName: resource.name,
+        resourceNameEs: resource.nameEs || undefined,
+        organizationName: resource.organization || undefined,
+        ...formData
+      })
+    }
+    setShowTrackModal(false)
+  }
+
+  const handleDelete = () => {
+    if (existingEntry) {
+      deleteEntry(existingEntry.id)
+      setShowTrackModal(false)
+    }
+  }
 
   return (
     <div className="min-h-screen">
@@ -323,11 +252,7 @@ export default function ResourceDetailClient({ resource }: Props) {
           )}
 
           {resource.latitude && resource.longitude && (
-            <ResourceMap
-              latitude={resource.latitude}
-              longitude={resource.longitude}
-              name={name}
-            />
+            <ResourceMap latitude={resource.latitude} longitude={resource.longitude} name={name} />
           )}
 
           <div className="grid grid-cols-2 gap-5">
@@ -359,12 +284,7 @@ export default function ResourceDetailClient({ resource }: Props) {
           {resource.website && (
             <div>
               <h2 className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1">{t.website}</h2>
-              <a
-                href={resource.website}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[var(--color-primary)] font-medium break-all"
-              >
+              <a href={resource.website} target="_blank" rel="noopener noreferrer" className="text-[var(--color-primary)] font-medium break-all">
                 {resource.website.replace(/^https?:\/\//, '')}
               </a>
             </div>
@@ -435,7 +355,7 @@ export default function ResourceDetailClient({ resource }: Props) {
         <div className="mt-8 pt-6 border-t border-[var(--color-border)] flex gap-3">
           <ShareButton title={name} text={description} phone={resource.phone} />
           <button
-            onClick={handleOpenModal}
+            onClick={() => setShowTrackModal(true)}
             className={`btn-secondary flex-1 flex items-center justify-center gap-2 ${existingEntry ? 'bg-[var(--color-success-light)] border-[var(--color-success)]' : ''}`}
           >
             {existingEntry ? (
@@ -456,122 +376,33 @@ export default function ResourceDetailClient({ resource }: Props) {
           </button>
         </div>
 
-        {/* Track Modal */}
-        {showTrackModal && (
-          <div
-            className="fixed inset-0 z-50 flex items-end justify-center sm:items-center"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="track-modal-title"
-          >
-            <div
-              className="absolute inset-0"
-              style={{ background: 'rgba(0,0,0,0.5)' }}
-              onClick={() => setShowTrackModal(false)}
-              aria-label={t.closeDialog}
-            />
-            <div
-              ref={modalRef}
-              className="relative w-full max-w-lg rounded-t-2xl sm:rounded-2xl p-6 max-h-[90vh] overflow-y-auto"
-              style={{ background: 'var(--color-surface)' }}
-            >
-              <h2 id="track-modal-title" className="text-lg font-semibold mb-4">
-                {existingEntry ? t.editTracking : t.track}
-              </h2>
-
-              {/* Status */}
-              <fieldset className="mb-4">
-                <legend className="text-xs font-semibold uppercase tracking-wider mb-2 block" style={{ color: 'var(--color-text-secondary)' }}>
-                  {t.status}
-                </legend>
-                <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label={t.status}>
-                  {(Object.keys(statusConfig) as TrackerStatus[]).map((status) => (
-                    <button
-                      key={status}
-                      onClick={() => setFormStatus(status)}
-                      className={`selection-btn text-center py-3 ${formStatus === status ? 'selected' : ''}`}
-                      role="radio"
-                      aria-checked={formStatus === status}
-                    >
-                      <span className="font-medium text-sm">
-                        {statusConfig[status][language]}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </fieldset>
-
-              {/* Contact Person */}
-              <div className="mb-4">
-                <label htmlFor="contact-person-input" className="text-xs font-semibold uppercase tracking-wider mb-2 block" style={{ color: 'var(--color-text-secondary)' }}>
-                  {t.contactPerson} <span style={{ color: 'var(--color-text-muted)' }}>({t.optional})</span>
-                </label>
-                <input
-                  id="contact-person-input"
-                  type="text"
-                  value={formContact}
-                  onChange={(e) => setFormContact(e.target.value)}
-                  placeholder="John Smith"
-                  className="input"
-                />
-              </div>
-
-              {/* Date Contacted */}
-              <div className="mb-4">
-                <label htmlFor="date-contacted-input" className="text-xs font-semibold uppercase tracking-wider mb-2 block" style={{ color: 'var(--color-text-secondary)' }}>
-                  {t.dateContacted}
-                </label>
-                <input
-                  id="date-contacted-input"
-                  type="date"
-                  value={formDate}
-                  onChange={(e) => setFormDate(e.target.value)}
-                  className="input"
-                />
-              </div>
-
-              {/* Notes */}
-              <div className="mb-6">
-                <label htmlFor="notes-input" className="text-xs font-semibold uppercase tracking-wider mb-2 block" style={{ color: 'var(--color-text-secondary)' }}>
-                  {t.notes} <span style={{ color: 'var(--color-text-muted)' }}>({t.optional})</span>
-                </label>
-                <textarea
-                  id="notes-input"
-                  value={formNotes}
-                  onChange={(e) => setFormNotes(e.target.value)}
-                  placeholder="Next steps, notes..."
-                  rows={3}
-                  className="input resize-none"
-                />
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-3">
-                {existingEntry && (
-                  <button
-                    onClick={handleDelete}
-                    className="px-4 py-3 font-medium rounded-xl transition-colors btn-touch"
-                    style={{ color: 'var(--color-error)' }}
-                  >
-                    {t.delete}
-                  </button>
-                )}
-                <button
-                  onClick={() => setShowTrackModal(false)}
-                  className="flex-1 btn-secondary"
-                >
-                  {t.cancel}
-                </button>
-                <button
-                  onClick={handleSave}
-                  className="flex-1 btn-primary"
-                >
-                  {t.save}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Tracker Modal */}
+        <TrackerModal
+          isOpen={showTrackModal}
+          onClose={() => setShowTrackModal(false)}
+          onSave={handleSave}
+          onDelete={existingEntry ? handleDelete : undefined}
+          existingData={existingEntry ? {
+            status: existingEntry.status,
+            contactPerson: existingEntry.contactPerson,
+            dateContacted: existingEntry.dateContacted,
+            notes: existingEntry.notes,
+          } : undefined}
+          language={language}
+          translations={{
+            track: t.track,
+            editTracking: t.editTracking,
+            contactPerson: t.contactPerson,
+            dateContacted: t.dateContacted,
+            status: t.status,
+            notes: t.notes,
+            save: t.save,
+            cancel: t.cancel,
+            delete: t.delete,
+            optional: t.optional,
+            closeDialog: t.closeDialog,
+          }}
+        />
 
         {/* Verification & Report */}
         <div className="mt-4 flex items-center justify-between">

@@ -3,37 +3,7 @@
 import Link from 'next/link'
 import { useLanguage } from '@/components/LanguageContext'
 import LanguageToggle from '@/components/LanguageToggle'
-
-const categories = {
-  en: [
-    { name: 'Housing', slug: 'housing', icon: '🏠', description: 'Shelter, rent help, Section 8', ariaLabel: 'Housing resources including shelter, rent help, and Section 8' },
-    { name: 'Food', slug: 'food', icon: '🍎', description: 'Food pantries, SNAP, meals', ariaLabel: 'Food resources including food pantries, SNAP, and meals' },
-    { name: 'Cash', slug: 'cash', icon: '💵', description: 'Emergency funds, TANF', ariaLabel: 'Cash assistance including emergency funds and TANF' },
-    { name: 'Harm Reduction', slug: 'harm-reduction', icon: '💊', description: 'Narcan, syringe services', ariaLabel: 'Harm reduction services including Narcan and syringe services' },
-    { name: 'Healthcare', slug: 'healthcare', icon: '🏥', description: 'Free clinics, Medicaid', ariaLabel: 'Healthcare resources including free clinics and Medicaid' },
-    { name: 'Mental Health', slug: 'mental-health', icon: '🧠', description: 'Counseling, crisis support', ariaLabel: 'Mental health resources including counseling and crisis support' },
-    { name: 'Jobs', slug: 'employment', icon: '💼', description: 'Job training, employment', ariaLabel: 'Employment resources including job training' },
-    { name: 'Childcare', slug: 'childcare', icon: '👶', description: 'Head Start, subsidized care', ariaLabel: 'Childcare resources including Head Start and subsidized care' },
-    { name: 'Legal Aid', slug: 'legal', icon: '⚖️', description: 'Eviction defense, expungement', ariaLabel: 'Legal aid including eviction defense and expungement' },
-    { name: 'Transportation', slug: 'transportation', icon: '🚌', description: 'Bus passes, medical rides', ariaLabel: 'Transportation resources including bus passes and medical rides' },
-    { name: 'Utilities', slug: 'utilities', icon: '💡', description: 'LIHEAP, bill assistance', ariaLabel: 'Utility assistance including LIHEAP and bill help' },
-    { name: 'Immigration', slug: 'immigration', icon: '📄', description: 'Legal services, asylum', ariaLabel: 'Immigration resources including legal services and asylum help' },
-  ],
-  es: [
-    { name: 'Vivienda', slug: 'housing', icon: '🏠', description: 'Refugio, ayuda con alquiler', ariaLabel: 'Recursos de vivienda incluyendo refugio y ayuda con alquiler' },
-    { name: 'Comida', slug: 'food', icon: '🍎', description: 'Despensas, SNAP, comidas', ariaLabel: 'Recursos de comida incluyendo despensas y SNAP' },
-    { name: 'Efectivo', slug: 'cash', icon: '💵', description: 'Fondos de emergencia, TANF', ariaLabel: 'Asistencia de efectivo incluyendo fondos de emergencia' },
-    { name: 'Reducción de Daños', slug: 'harm-reduction', icon: '💊', description: 'Narcan, servicios de jeringas', ariaLabel: 'Servicios de reducción de daños incluyendo Narcan' },
-    { name: 'Salud', slug: 'healthcare', icon: '🏥', description: 'Clínicas gratis, Medicaid', ariaLabel: 'Recursos de salud incluyendo clínicas gratis' },
-    { name: 'Salud Mental', slug: 'mental-health', icon: '🧠', description: 'Consejería, apoyo en crisis', ariaLabel: 'Recursos de salud mental incluyendo consejería' },
-    { name: 'Empleo', slug: 'employment', icon: '💼', description: 'Capacitación, trabajo', ariaLabel: 'Recursos de empleo incluyendo capacitación' },
-    { name: 'Cuidado Infantil', slug: 'childcare', icon: '👶', description: 'Head Start, subsidios', ariaLabel: 'Recursos de cuidado infantil incluyendo Head Start' },
-    { name: 'Ayuda Legal', slug: 'legal', icon: '⚖️', description: 'Defensa contra desalojo', ariaLabel: 'Ayuda legal incluyendo defensa contra desalojo' },
-    { name: 'Transporte', slug: 'transportation', icon: '🚌', description: 'Pases de autobús, viajes', ariaLabel: 'Recursos de transporte incluyendo pases de autobús' },
-    { name: 'Servicios', slug: 'utilities', icon: '💡', description: 'LIHEAP, ayuda con facturas', ariaLabel: 'Asistencia de servicios públicos incluyendo LIHEAP' },
-    { name: 'Inmigración', slug: 'immigration', icon: '📄', description: 'Servicios legales, asilo', ariaLabel: 'Recursos de inmigración incluyendo servicios legales' },
-  ]
-}
+import { getCategoriesWithDetails } from '@/lib/categories'
 
 const content = {
   en: {
@@ -73,7 +43,7 @@ const content = {
 export default function Home() {
   const { language } = useLanguage()
   const t = content[language]
-  const cats = categories[language]
+  const cats = getCategoriesWithDetails(language)
 
   return (
     <div className="min-h-screen">
