@@ -1,8 +1,5 @@
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
-
-const additionalResources = [
+// Additional resources — food pantries, shelters, etc.
+export const additionalResources = [
   // ===== FOOD - Churches & Pantries =====
   {
     name: 'Community Soup Kitchen of New Haven',
@@ -492,39 +489,3 @@ const additionalResources = [
   },
 ]
 
-async function main() {
-  console.log('Adding additional resources...')
-
-  let added = 0
-  for (const resource of additionalResources) {
-    // Check if resource already exists by name
-    const existing = await prisma.resource.findFirst({
-      where: { name: resource.name }
-    })
-
-    if (!existing) {
-      await prisma.resource.create({
-        data: {
-          ...resource,
-          verifiedAt: new Date(),
-        }
-      })
-      added++
-      console.log(`Added: ${resource.name}`)
-    } else {
-      console.log(`Skipped (exists): ${resource.name}`)
-    }
-  }
-
-  console.log(`\nAdded ${added} new resources`)
-  console.log('Done!')
-}
-
-main()
-  .catch((e) => {
-    console.error(e)
-    process.exit(1)
-  })
-  .finally(async () => {
-    await prisma.$disconnect()
-  })

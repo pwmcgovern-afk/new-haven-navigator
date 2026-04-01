@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
 }
 
 datasource db {
@@ -33,18 +34,6 @@ model Resource {
 
   // Eligibility criteria (JSON for flexibility)
   eligibility Json?
-  // Structure:
-  // {
-  //   incomeLimitPctFpl: number | null,  // e.g., 200 = 200% FPL
-  //   housingStatus: string[],           // ["homeless", "at_risk", "housed"]
-  //   populations: string[],             // ["veteran", "formerly_incarcerated", "pregnant", etc.]
-  //   insuranceRequired: boolean | null,
-  //   documentsRequired: string[],
-  //   ageMin: number | null,
-  //   ageMax: number | null,
-  //   residencyRequired: boolean,
-  //   citizenshipRequired: boolean
-  // }
 
   // Application info
   howToApply  String?
@@ -59,8 +48,11 @@ model Resource {
   tipsEs        String[]
 
   // Data source tracking
-  source      String   @default("manual") // "manual", "211", "findhelp"
+  source      String   @default("manual")
   sourceId    String?
+
+  // Full-text search (managed by DB trigger)
+  search_vector Unsupported("tsvector")?
 
   // Timestamps
   verifiedAt  DateTime?
@@ -87,5 +79,32 @@ model Feedback {
   helpful    Boolean
   createdAt  DateTime @default(now())
 
+  @@index([resourceId])
+}
+
+model AnonymousUser {
+  id        String         @id @default(uuid())
+  token     String         @unique
+  createdAt DateTime       @default(now())
+  entries   TrackerEntry[]
+}
+
+model TrackerEntry {
+  id               String   @id @default(uuid())
+  userId           String
+  resourceId       String
+  resourceName     String
+  resourceNameEs   String?
+  organizationName String?
+  status           String   @default("reached_out")
+  contactPerson    String   @default("")
+  dateContacted    String   @default("")
+  notes            String   @default("")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @default(now())
+
+  user AnonymousUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
   @@index([resourceId])
 }
