@@ -7,6 +7,7 @@ import ShareButton from '@/components/ShareButton'
 import LanguageToggle from '@/components/LanguageToggle'
 import { useLanguage } from '@/components/LanguageContext'
 import { useTracker } from '@/components/TrackerContext'
+import type { TrackerStatus } from '@/lib/trackerTypes'
 import { getCategoryInfo } from '@/lib/categories'
 import type { Resource } from '@/lib/types'
 import TrackerModal from './TrackerModal'
@@ -140,7 +141,7 @@ export default function ResourceDetailClient({ resource }: Props) {
   const translateHousing = (s: string) => t[s as keyof typeof t] || s
   const translatePopulation = (p: string) => t[p as keyof typeof t] || p
 
-  const handleSave = (formData: { status: string; contactPerson: string; dateContacted: string; notes: string }) => {
+  const handleSave = (formData: { status: TrackerStatus; contactPerson: string; dateContacted: string; notes: string }) => {
     if (existingEntry) {
       updateEntry(existingEntry.id, formData)
     } else {
