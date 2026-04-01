@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useLanguage } from '@/components/LanguageContext'
 import LanguageToggle from '@/components/LanguageToggle'
 import { isOpenNow } from '@/lib/hoursParser'
+import { getCategoriesForLanguage, getCategoryInfo } from '@/lib/categories'
 
 interface Resource {
   id: string
@@ -23,37 +24,6 @@ interface Props {
   resources: Resource[]
   query?: string
   category?: string
-}
-
-const categories = {
-  en: [
-    { slug: 'housing', name: 'Housing', icon: '🏠' },
-    { slug: 'food', name: 'Food', icon: '🍎' },
-    { slug: 'cash', name: 'Cash', icon: '💵' },
-    { slug: 'harm-reduction', name: 'Harm Reduction', icon: '💊' },
-    { slug: 'healthcare', name: 'Healthcare', icon: '🏥' },
-    { slug: 'mental-health', name: 'Mental Health', icon: '🧠' },
-    { slug: 'employment', name: 'Jobs', icon: '💼' },
-    { slug: 'childcare', name: 'Childcare', icon: '👶' },
-    { slug: 'legal', name: 'Legal', icon: '⚖️' },
-    { slug: 'transportation', name: 'Transport', icon: '🚌' },
-    { slug: 'utilities', name: 'Utilities', icon: '💡' },
-    { slug: 'immigration', name: 'Immigration', icon: '📄' },
-  ],
-  es: [
-    { slug: 'housing', name: 'Vivienda', icon: '🏠' },
-    { slug: 'food', name: 'Comida', icon: '🍎' },
-    { slug: 'cash', name: 'Efectivo', icon: '💵' },
-    { slug: 'harm-reduction', name: 'Reducción', icon: '💊' },
-    { slug: 'healthcare', name: 'Salud', icon: '🏥' },
-    { slug: 'mental-health', name: 'Mental', icon: '🧠' },
-    { slug: 'employment', name: 'Empleo', icon: '💼' },
-    { slug: 'childcare', name: 'Niños', icon: '👶' },
-    { slug: 'legal', name: 'Legal', icon: '⚖️' },
-    { slug: 'transportation', name: 'Transporte', icon: '🚌' },
-    { slug: 'utilities', name: 'Servicios', icon: '💡' },
-    { slug: 'immigration', name: 'Inmigración', icon: '📄' },
-  ]
 }
 
 const content = {
@@ -94,10 +64,10 @@ const content = {
 export default function ResourcesClient({ resources, query, category }: Props) {
   const { language } = useLanguage()
   const t = content[language]
-  const cats = categories[language]
+  const cats = getCategoriesForLanguage(language)
   const [openNowFilter, setOpenNowFilter] = useState(false)
 
-  const getCatName = (slug: string) => cats.find(c => c.slug === slug)?.name || slug
+  const getCatName = (slug: string) => getCategoryInfo(slug, language)?.name || slug
 
   // Filter by "Open Now" if enabled
   const filteredResources = openNowFilter

@@ -2,6 +2,9 @@ import { prisma } from '@/lib/db'
 import type { ResourceListItem } from '@/lib/types'
 import ResourcesClient from './ResourcesClient'
 
+// Revalidate resource list every hour
+export const revalidate = 3600
+
 export default async function ResourcesPage({
   searchParams
 }: {
@@ -9,16 +12,19 @@ export default async function ResourcesPage({
 }) {
   const { q, category } = searchParams
 
+  // Limit search query length
+  const safeQ = q?.slice(0, 200)
+
   const resources = await prisma.resource.findMany({
     where: {
       AND: [
-        q ? {
+        safeQ ? {
           OR: [
-            { name: { contains: q, mode: 'insensitive' } },
-            { description: { contains: q, mode: 'insensitive' } },
-            { organization: { contains: q, mode: 'insensitive' } },
-            { categories: { has: q.toLowerCase() } },
-            { address: { contains: q, mode: 'insensitive' } },
+            { name: { contains: safeQ, mode: 'insensitive' } },
+            { description: { contains: safeQ, mode: 'insensitive' } },
+            { organization: { contains: safeQ, mode: 'insensitive' } },
+            { categories: { has: safeQ.toLowerCase() } },
+            { address: { contains: safeQ, mode: 'insensitive' } },
           ]
         } : {},
         category ? {
@@ -43,5 +49,5 @@ export default async function ResourcesPage({
     }
   })
 
-  return <ResourcesClient resources={resources} query={q} category={category} />
+  return <ResourcesClient resources={resources} query={safeQ} category={category} />
 }

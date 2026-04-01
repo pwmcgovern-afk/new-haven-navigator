@@ -1,4 +1,7 @@
 import { calculatePctFPL } from './constants'
+import type { EligibilityCriteria } from './types'
+
+export type { EligibilityCriteria }
 
 export interface UserProfile {
   zipCode: string
@@ -8,18 +11,6 @@ export interface UserProfile {
   insuranceStatus: string
   populations: string[]
   categoriesNeeded: string[]
-}
-
-export interface EligibilityCriteria {
-  incomeLimitPctFpl?: number | null
-  housingStatus?: string[]
-  populations?: string[]
-  insuranceRequired?: boolean | null
-  documentsRequired?: string[]
-  ageMin?: number | null
-  ageMax?: number | null
-  residencyRequired?: boolean
-  citizenshipRequired?: boolean
 }
 
 export interface ResourceWithEligibility {

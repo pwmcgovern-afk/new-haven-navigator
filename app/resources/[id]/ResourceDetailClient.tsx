@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import ShareButton from '@/components/ShareButton'
@@ -8,43 +8,13 @@ import LanguageToggle from '@/components/LanguageToggle'
 import { useLanguage } from '@/components/LanguageContext'
 import { useTracker } from '@/components/TrackerContext'
 import { statusConfig, type TrackerStatus } from '@/lib/trackerTypes'
+import { getCategoryInfo } from '@/lib/categories'
 import type { Resource } from '@/lib/types'
 
 const ResourceMap = dynamic(() => import('@/components/ResourceMap'), { ssr: false })
 
 interface Props {
   resource: Resource
-}
-
-const categories = {
-  en: [
-    { slug: 'housing', name: 'Housing', icon: '🏠' },
-    { slug: 'food', name: 'Food', icon: '🍎' },
-    { slug: 'cash', name: 'Cash', icon: '💵' },
-    { slug: 'harm-reduction', name: 'Harm Reduction', icon: '💊' },
-    { slug: 'healthcare', name: 'Healthcare', icon: '🏥' },
-    { slug: 'mental-health', name: 'Mental Health', icon: '🧠' },
-    { slug: 'employment', name: 'Jobs', icon: '💼' },
-    { slug: 'childcare', name: 'Childcare', icon: '👶' },
-    { slug: 'legal', name: 'Legal Aid', icon: '⚖️' },
-    { slug: 'transportation', name: 'Transportation', icon: '🚌' },
-    { slug: 'utilities', name: 'Utilities', icon: '💡' },
-    { slug: 'immigration', name: 'Immigration', icon: '📄' },
-  ],
-  es: [
-    { slug: 'housing', name: 'Vivienda', icon: '🏠' },
-    { slug: 'food', name: 'Comida', icon: '🍎' },
-    { slug: 'cash', name: 'Efectivo', icon: '💵' },
-    { slug: 'harm-reduction', name: 'Reducción de Daños', icon: '💊' },
-    { slug: 'healthcare', name: 'Salud', icon: '🏥' },
-    { slug: 'mental-health', name: 'Salud Mental', icon: '🧠' },
-    { slug: 'employment', name: 'Empleo', icon: '💼' },
-    { slug: 'childcare', name: 'Cuidado Infantil', icon: '👶' },
-    { slug: 'legal', name: 'Ayuda Legal', icon: '⚖️' },
-    { slug: 'transportation', name: 'Transporte', icon: '🚌' },
-    { slug: 'utilities', name: 'Servicios', icon: '💡' },
-    { slug: 'immigration', name: 'Inmigración', icon: '📄' },
-  ]
 }
 
 const content = {
@@ -149,11 +119,46 @@ const content = {
 export default function ResourceDetailClient({ resource }: Props) {
   const { language } = useLanguage()
   const t = content[language]
-  const cats = categories[language]
   const { getEntryByResourceId, addEntry, updateEntry, deleteEntry } = useTracker()
 
   const [showTrackModal, setShowTrackModal] = useState(false)
+  const modalRef = useRef<HTMLDivElement>(null)
   const existingEntry = getEntryByResourceId(resource.id)
+
+  // Focus trap and escape key for tracker modal
+  useEffect(() => {
+    if (!showTrackModal) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowTrackModal(false)
+        return
+      }
+
+      if (e.key === 'Tab' && modalRef.current) {
+        const focusable = modalRef.current.querySelectorAll<HTMLElement>(
+          'button, input, textarea, [tabindex]:not([tabindex="-1"])'
+        )
+        const first = focusable[0]
+        const last = focusable[focusable.length - 1]
+
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault()
+          last?.focus()
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault()
+          first?.focus()
+        }
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    // Focus the first interactive element
+    const firstInput = modalRef.current?.querySelector<HTMLElement>('button, input')
+    firstInput?.focus()
+
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [showTrackModal])
 
   const [formStatus, setFormStatus] = useState<TrackerStatus>(existingEntry?.status || 'reached_out')
   const [formContact, setFormContact] = useState(existingEntry?.contactPerson || '')
@@ -203,7 +208,7 @@ export default function ResourceDetailClient({ resource }: Props) {
     }
   }
 
-  const getCategoryInfo = (slug: string) => cats.find(c => c.slug === slug)
+  const getCatInfo = (slug: string) => getCategoryInfo(slug, language)
 
   // Use organization-specific tips
   const tips = language === 'es' && resource.tipsEs?.length > 0
@@ -223,7 +228,7 @@ export default function ResourceDetailClient({ resource }: Props) {
       )}`
     : null
 
-  const eligibility = resource.eligibility as Record<string, unknown> | null
+  const eligibility = resource.eligibility
 
   const translateHousing = (s: string) => t[s as keyof typeof t] || s
   const translatePopulation = (p: string) => t[p as keyof typeof t] || p
@@ -252,7 +257,7 @@ export default function ResourceDetailClient({ resource }: Props) {
         <nav aria-label={language === 'en' ? 'Resource categories' : 'Categorías del recurso'}>
           <div className="flex flex-wrap gap-2 mb-4">
             {resource.categories.map((cat) => {
-              const catInfo = getCategoryInfo(cat)
+              const catInfo = getCatInfo(cat)
               return (
                 <Link key={cat} href={`/category/${cat}`} className="category-pill">
                   <span aria-hidden="true">{catInfo?.icon}</span> {catInfo?.name}
@@ -466,6 +471,7 @@ export default function ResourceDetailClient({ resource }: Props) {
               aria-label={t.closeDialog}
             />
             <div
+              ref={modalRef}
               className="relative w-full max-w-lg rounded-t-2xl sm:rounded-2xl p-6 max-h-[90vh] overflow-y-auto"
               style={{ background: 'var(--color-surface)' }}
             >
@@ -573,7 +579,7 @@ export default function ResourceDetailClient({ resource }: Props) {
             {t.lastVerified}: {resource.verifiedAt ? new Date(resource.verifiedAt).toLocaleDateString() : t.notVerified}
           </p>
           <a
-            href={`mailto:pmcgovern@bowerycap.com?subject=${encodeURIComponent(`${t.reportIssueSubject} ${resource.name}`)}&body=${encodeURIComponent(`Resource: ${resource.name}\nID: ${resource.id}\n\nIssue:\n`)}`}
+            href={`mailto:pwmcgovern@gmail.com?subject=${encodeURIComponent(`${t.reportIssueSubject} ${resource.name}`)}&body=${encodeURIComponent(`Resource: ${resource.name}\nID: ${resource.id}\n\nIssue:\n`)}`}
             className="text-xs font-medium flex items-center gap-1 btn-touch"
             style={{ color: 'var(--color-text-muted)' }}
           >

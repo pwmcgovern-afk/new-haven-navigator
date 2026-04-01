@@ -3,6 +3,9 @@ import { prisma } from '@/lib/db'
 import type { Resource } from '@/lib/types'
 import ResourceDetailClient from './ResourceDetailClient'
 
+// Revalidate detail pages every 30 minutes
+export const revalidate = 1800
+
 export default async function ResourceDetailPage({
   params
 }: {

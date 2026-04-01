@@ -130,6 +130,25 @@ export const translations = {
     chatOpen: 'Open chat assistant',
     chatClose: 'Close chat assistant',
     chatWelcome: 'Hi! I can help you find social services in New Haven. What kind of help are you looking for?',
+
+    // Error pages
+    errorTitle: 'Something went wrong',
+    errorMessage: 'We had trouble loading this page. Please try again.',
+    tryAgain: 'Try again',
+    goHome: 'Go home',
+    notFoundTitle: 'Page not found',
+    notFoundMessage: "The page you're looking for doesn't exist or has been moved.",
+    browseResources: 'Browse resources',
+
+    // Share
+    shareResource: 'Share this resource',
+
+    // Footer
+    contactAdmin: 'Contact the admin',
+
+    // Chat errors
+    chatError: 'Something went wrong. Please try again.',
+    chatRetry: 'Retry',
   },
 
   es: {
@@ -261,6 +280,25 @@ export const translations = {
     chatOpen: 'Abrir asistente de chat',
     chatClose: 'Cerrar asistente de chat',
     chatWelcome: '¡Hola! Puedo ayudarle a encontrar servicios sociales en New Haven. ¿Qué tipo de ayuda necesita?',
+
+    // Error pages
+    errorTitle: 'Algo salio mal',
+    errorMessage: 'Tuvimos problemas al cargar esta pagina. Por favor intente de nuevo.',
+    tryAgain: 'Intentar de nuevo',
+    goHome: 'Ir al inicio',
+    notFoundTitle: 'Pagina no encontrada',
+    notFoundMessage: 'La pagina que busca no existe o ha sido movida.',
+    browseResources: 'Ver recursos',
+
+    // Share
+    shareResource: 'Compartir este recurso',
+
+    // Footer
+    contactAdmin: 'Contactar al administrador',
+
+    // Chat errors
+    chatError: 'Algo salio mal. Por favor intente de nuevo.',
+    chatRetry: 'Reintentar',
   }
 }
 

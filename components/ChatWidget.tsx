@@ -54,6 +54,7 @@ export default function ChatWidget() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const bubbleRef = useRef<HTMLButtonElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
   const prevLanguageRef = useRef(language)
 
   const welcomeMessage = {
@@ -69,6 +70,8 @@ export default function ChatWidget() {
     handleSubmit,
     isLoading,
     setMessages,
+    error,
+    reload,
   } = useChat({
     body: { language },
     initialMessages: [welcomeMessage],
@@ -91,7 +94,7 @@ export default function ChatWidget() {
   // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+  }, [messages, error])
 
   // Focus input when panel opens
   useEffect(() => {
@@ -100,12 +103,32 @@ export default function ChatWidget() {
     }
   }, [isOpen])
 
-  // Escape key closes panel
+  // Escape key closes panel, focus trapping inside dialog
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
+      if (!isOpen) return
+
+      if (e.key === 'Escape') {
         setIsOpen(false)
         bubbleRef.current?.focus()
+        return
+      }
+
+      // Focus trapping within the chat panel
+      if (e.key === 'Tab' && panelRef.current) {
+        const focusableElements = panelRef.current.querySelectorAll<HTMLElement>(
+          'button, input, a, [tabindex]:not([tabindex="-1"])'
+        )
+        const first = focusableElements[0]
+        const last = focusableElements[focusableElements.length - 1]
+
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault()
+          last?.focus()
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault()
+          first?.focus()
+        }
       }
     },
     [isOpen]
@@ -121,6 +144,7 @@ export default function ChatWidget() {
       {/* Chat Panel */}
       {isOpen && (
         <div
+          ref={panelRef}
           className="fixed bottom-24 right-4 sm:right-6 z-50 chat-panel"
           style={{
             width: 'min(24rem, calc(100vw - 2rem))',
@@ -216,6 +240,29 @@ export default function ChatWidget() {
                       className="chat-typing-dot"
                       style={{ animationDelay: '0.3s' }}
                     />
+                  </div>
+                </div>
+              )}
+              {/* Error UI */}
+              {error && (
+                <div className="flex justify-start">
+                  <div
+                    className="rounded-2xl px-4 py-3 text-sm"
+                    style={{
+                      background: 'var(--color-error-light, #fef2f2)',
+                      color: 'var(--color-error, #dc2626)',
+                      maxWidth: '85%',
+                    }}
+                    role="alert"
+                  >
+                    <p className="mb-2">{t('chatError')}</p>
+                    <button
+                      onClick={() => reload()}
+                      className="underline font-medium text-sm"
+                      style={{ color: 'var(--color-error, #dc2626)' }}
+                    >
+                      {t('chatRetry')}
+                    </button>
                   </div>
                 </div>
               )}

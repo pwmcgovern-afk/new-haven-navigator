@@ -3,6 +3,9 @@ import { prisma } from '@/lib/db'
 import { CATEGORIES } from '@/lib/constants'
 import CategoryClient from './CategoryClient'
 
+// Revalidate category pages every hour
+export const revalidate = 3600
+
 export default async function CategoryPage({
   params
 }: {

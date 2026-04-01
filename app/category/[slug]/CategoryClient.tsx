@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useLanguage } from '@/components/LanguageContext'
 import LanguageToggle from '@/components/LanguageToggle'
+import { getCategoryInfo } from '@/lib/categories'
 
 interface Resource {
   id: string
@@ -19,37 +20,6 @@ interface Resource {
 interface Props {
   slug: string
   resources: Resource[]
-}
-
-const categories = {
-  en: [
-    { slug: 'housing', name: 'Housing', icon: '🏠' },
-    { slug: 'food', name: 'Food', icon: '🍎' },
-    { slug: 'cash', name: 'Cash Assistance', icon: '💵' },
-    { slug: 'harm-reduction', name: 'Harm Reduction', icon: '💊' },
-    { slug: 'healthcare', name: 'Healthcare', icon: '🏥' },
-    { slug: 'mental-health', name: 'Mental Health', icon: '🧠' },
-    { slug: 'employment', name: 'Employment', icon: '💼' },
-    { slug: 'childcare', name: 'Childcare', icon: '👶' },
-    { slug: 'legal', name: 'Legal Aid', icon: '⚖️' },
-    { slug: 'transportation', name: 'Transportation', icon: '🚌' },
-    { slug: 'utilities', name: 'Utilities', icon: '💡' },
-    { slug: 'immigration', name: 'Immigration', icon: '📄' },
-  ],
-  es: [
-    { slug: 'housing', name: 'Vivienda', icon: '🏠' },
-    { slug: 'food', name: 'Comida', icon: '🍎' },
-    { slug: 'cash', name: 'Asistencia en Efectivo', icon: '💵' },
-    { slug: 'harm-reduction', name: 'Reducción de Daños', icon: '💊' },
-    { slug: 'healthcare', name: 'Salud', icon: '🏥' },
-    { slug: 'mental-health', name: 'Salud Mental', icon: '🧠' },
-    { slug: 'employment', name: 'Empleo', icon: '💼' },
-    { slug: 'childcare', name: 'Cuidado Infantil', icon: '👶' },
-    { slug: 'legal', name: 'Ayuda Legal', icon: '⚖️' },
-    { slug: 'transportation', name: 'Transporte', icon: '🚌' },
-    { slug: 'utilities', name: 'Servicios Públicos', icon: '💡' },
-    { slug: 'immigration', name: 'Inmigración', icon: '📄' },
-  ]
 }
 
 const content = {
@@ -80,9 +50,8 @@ const content = {
 export default function CategoryClient({ slug, resources }: Props) {
   const { language } = useLanguage()
   const t = content[language]
-  const cats = categories[language]
 
-  const category = cats.find(c => c.slug === slug)
+  const category = getCategoryInfo(slug, language)
   if (!category) return null
 
   return (

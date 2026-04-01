@@ -1,3 +1,15 @@
+export interface EligibilityCriteria {
+  incomeLimitPctFpl?: number | null
+  housingStatus?: string[]
+  populations?: string[]
+  insuranceRequired?: boolean | null
+  documentsRequired?: string[]
+  ageMin?: number | null
+  ageMax?: number | null
+  residencyRequired?: boolean
+  citizenshipRequired?: boolean
+}
+
 export interface Resource {
   id: string
   name: string
@@ -14,7 +26,7 @@ export interface Resource {
   website: string | null
   email: string | null
   hours: string | null
-  eligibility: unknown
+  eligibility: EligibilityCriteria | null
   howToApply: string | null
   tips: string[]
   // Spanish translations
