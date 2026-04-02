@@ -27,6 +27,9 @@ interface Props {
   resources: Resource[]
   query?: string
   category?: string
+  insurance?: string
+  langFilter?: string
+  accepting?: string
 }
 
 const content = {
@@ -64,7 +67,7 @@ const content = {
   }
 }
 
-export default function ResourcesClient({ resources, query, category }: Props) {
+export default function ResourcesClient({ resources, query, category, insurance, langFilter, accepting }: Props) {
   const { language } = useLanguage()
   const t = content[language]
   const cats = getCategoriesForLanguage(language)
@@ -148,6 +151,9 @@ export default function ResourcesClient({ resources, query, category }: Props) {
             />
           </div>
           {category && <input type="hidden" name="category" value={category} />}
+          {insurance && <input type="hidden" name="insurance" value={insurance} />}
+          {langFilter && <input type="hidden" name="language" value={langFilter} />}
+          {accepting && <input type="hidden" name="accepting" value={accepting} />}
         </form>
       </header>
 
@@ -176,6 +182,29 @@ export default function ResourcesClient({ resources, query, category }: Props) {
             >
               <span className="mr-1" aria-hidden="true">📍</span> {language === 'es' ? 'Cerca' : 'Near Me'}
             </button>
+            {accepting === '1' ? (
+              <Link href={`/resources?${query ? `q=${query}` : ''}${category ? `&category=${category}` : ''}`}
+                className="category-pill whitespace-nowrap active">
+                <span className="mr-1" aria-hidden="true">&#9989;</span> {language === 'es' ? 'Abierto' : 'Open'}
+              </Link>
+            ) : (
+              <Link href={`/resources?accepting=1${query ? `&q=${query}` : ''}${category ? `&category=${category}` : ''}`}
+                className="category-pill whitespace-nowrap">
+                <span className="mr-1" aria-hidden="true">&#9989;</span> {language === 'es' ? 'Abierto' : 'Open'}
+              </Link>
+            )}
+            {insurance && (
+              <Link href={`/resources?${query ? `q=${query}` : ''}${category ? `&category=${category}` : ''}`}
+                className="category-pill whitespace-nowrap active">
+                {insurance} &#10005;
+              </Link>
+            )}
+            {langFilter && (
+              <Link href={`/resources?${query ? `q=${query}` : ''}${category ? `&category=${category}` : ''}`}
+                className="category-pill whitespace-nowrap active">
+                {langFilter} &#10005;
+              </Link>
+            )}
             {cats.map((cat) => (
               <Link
                 key={cat.slug}

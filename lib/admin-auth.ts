@@ -1,4 +1,5 @@
-import { createHmac, timingSafeEqual } from 'crypto'
+import { createHmac, createHash, timingSafeEqual } from 'crypto'
+import { prisma } from './db'
 
 const COOKIE_NAME = 'admin_session'
 const SESSION_PAYLOAD = 'nhv-navigator-admin-session'
@@ -9,13 +10,36 @@ function getAdminKey(): string {
   return key
 }
 
+// Hash password for storage (SHA-256 — adequate for single-admin tool)
+export function hashPassword(password: string): string {
+  return createHash('sha256').update(password).digest('hex')
+}
+
 export function createSessionToken(): string {
   const key = getAdminKey()
   return createHmac('sha256', key).update(SESSION_PAYLOAD).digest('hex')
 }
 
+// Create session token for a specific admin user
+export function createUserSessionToken(userId: string): string {
+  const key = getAdminKey()
+  return createHmac('sha256', key).update(`user:${userId}`).digest('hex') + ':' + userId
+}
+
 export function verifySessionToken(token: string): boolean {
   try {
+    // Check if it's a user-specific token (format: hmac:userId)
+    if (token.includes(':')) {
+      const [hmac, userId] = token.split(':')
+      const key = getAdminKey()
+      const expected = createHmac('sha256', key).update(`user:${userId}`).digest('hex')
+      const hmacBuf = Buffer.from(hmac, 'utf8')
+      const expectedBuf = Buffer.from(expected, 'utf8')
+      if (hmacBuf.length !== expectedBuf.length) return false
+      return timingSafeEqual(hmacBuf, expectedBuf)
+    }
+
+    // Legacy API key session
     const expected = createSessionToken()
     const tokenBuf = Buffer.from(token, 'utf8')
     const expectedBuf = Buffer.from(expected, 'utf8')
@@ -38,16 +62,30 @@ export function verifyApiKey(key: string): boolean {
   }
 }
 
-// Check request for valid admin auth (cookie or Bearer token)
+// Verify email/password login
+export async function verifyEmailPassword(email: string, password: string): Promise<string | null> {
+  const user = await prisma.adminUser.findUnique({ where: { email } })
+  if (!user) return null
+
+  const hash = hashPassword(password)
+  if (hash !== user.passwordHash) return null
+
+  // Update last login
+  await prisma.adminUser.update({
+    where: { id: user.id },
+    data: { lastLoginAt: new Date() }
+  })
+
+  return user.id
+}
+
 export function isAdminAuthenticated(req: Request): boolean {
-  // Check Bearer token first (for API calls)
   const authHeader = req.headers.get('authorization')
   if (authHeader?.startsWith('Bearer ')) {
     const token = authHeader.slice(7)
     if (verifyApiKey(token)) return true
   }
 
-  // Check cookie (for browser pages)
   const cookieHeader = req.headers.get('cookie') || ''
   const match = cookieHeader.match(new RegExp(`${COOKIE_NAME}=([^;]+)`))
   if (match) {
@@ -57,7 +95,6 @@ export function isAdminAuthenticated(req: Request): boolean {
   return false
 }
 
-// For use in API routes — returns 401 Response if not authenticated
 export function requireAdmin(req: Request): Response | null {
   if (!isAdminAuthenticated(req)) {
     return new Response(
@@ -70,10 +107,11 @@ export function requireAdmin(req: Request): Response | null {
 
 export const ADMIN_COOKIE_NAME = COOKIE_NAME
 
-export function getAdminCookieOptions(): string {
-  const maxAge = 60 * 60 * 24 * 7 // 7 days
+export function getAdminCookieOptions(token?: string): string {
+  const sessionToken = token || createSessionToken()
+  const maxAge = 60 * 60 * 24 * 7
   const secure = process.env.NODE_ENV === 'production' ? '; Secure' : ''
-  return `${COOKIE_NAME}=${createSessionToken()}; HttpOnly; SameSite=Strict; Path=/admin; Max-Age=${maxAge}${secure}`
+  return `${COOKIE_NAME}=${sessionToken}; HttpOnly; SameSite=Strict; Path=/admin; Max-Age=${maxAge}${secure}`
 }
 
 export function getClearCookieHeader(): string {

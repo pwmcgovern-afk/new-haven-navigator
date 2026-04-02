@@ -2,24 +2,37 @@ import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/db'
 import ResourcesClient from './ResourcesClient'
 
-// Revalidate resource list every hour
 export const revalidate = 3600
 
 export default async function ResourcesPage({
   searchParams
 }: {
-  searchParams: { q?: string; category?: string }
+  searchParams: {
+    q?: string; category?: string; insurance?: string;
+    language?: string; accepting?: string
+  }
 }) {
-  const { q, category } = searchParams
+  const { q, category, insurance, language: langFilter, accepting } = searchParams
   const safeQ = q?.slice(0, 200)
+
+  // Build Prisma where clause for non-FTS filters
+  const extraFilters: Prisma.ResourceWhereInput[] = []
+  if (category) extraFilters.push({ categories: { has: category } })
+  if (insurance) extraFilters.push({ insuranceAccepted: { has: insurance } })
+  if (langFilter) extraFilters.push({ languages: { has: langFilter } })
+  if (accepting === '1') extraFilters.push({ acceptingClients: true })
+
+  const selectFields = {
+    id: true, name: true, nameEs: true, organization: true,
+    description: true, descriptionEs: true, categories: true,
+    address: true, phone: true, hours: true, latitude: true, longitude: true,
+    cost: true, acceptingClients: true, languages: true, insuranceAccepted: true,
+  }
 
   let resources
 
   if (safeQ && safeQ.trim().length > 0) {
-    // Build tsquery from search terms with prefix matching
-    const tsQuery = safeQ
-      .trim()
-      .split(/\s+/)
+    const tsQuery = safeQ.trim().split(/\s+/)
       .filter(w => w.length > 1)
       .map(w => w.replace(/[^a-zA-Z0-9áéíóúñü]/g, ''))
       .filter(Boolean)
@@ -27,48 +40,55 @@ export default async function ResourcesPage({
       .join(' & ')
 
     if (tsQuery) {
-      // Full-text search with ILIKE fallback for partial/accent matches
-      const categoryFilter = category
-        ? Prisma.sql`AND ${category} = ANY(categories)`
-        : Prisma.empty
-
-      resources = await prisma.$queryRaw`
-        SELECT id, name, "nameEs", organization, description, "descriptionEs",
-               categories, address, phone, hours, latitude, longitude
-        FROM "Resource"
+      // Full-text search — then apply extra filters in Prisma
+      const ftsResults = await prisma.$queryRaw`
+        SELECT id FROM "Resource"
         WHERE (
           "search_vector" @@ to_tsquery('english', ${tsQuery})
           OR name ILIKE ${'%' + safeQ + '%'}
           OR "nameEs" ILIKE ${'%' + safeQ + '%'}
           OR organization ILIKE ${'%' + safeQ + '%'}
         )
-        ${categoryFilter}
-        ORDER BY
-          ts_rank("search_vector", to_tsquery('english', ${tsQuery})) DESC,
-          name ASC
-      `
+        ORDER BY ts_rank("search_vector", to_tsquery('english', ${tsQuery})) DESC
+      ` as { id: string }[]
+
+      const ids = ftsResults.map(r => r.id)
+
+      if (ids.length > 0) {
+        resources = await prisma.resource.findMany({
+          where: {
+            id: { in: ids },
+            AND: extraFilters,
+          },
+          select: selectFields,
+        })
+        // Preserve FTS ranking order
+        const idOrder = new Map(ids.map((id, i) => [id, i]))
+        resources.sort((a, b) => (idOrder.get(a.id) ?? 999) - (idOrder.get(b.id) ?? 999))
+      } else {
+        resources = []
+      }
     } else {
       resources = await prisma.resource.findMany({
-        where: category ? { categories: { has: category } } : {},
+        where: { AND: extraFilters },
         orderBy: { name: 'asc' },
-        select: {
-          id: true, name: true, nameEs: true, organization: true,
-          description: true, descriptionEs: true, categories: true,
-          address: true, phone: true, hours: true, latitude: true, longitude: true
-        }
+        select: selectFields,
       })
     }
   } else {
     resources = await prisma.resource.findMany({
-      where: category ? { categories: { has: category } } : {},
+      where: extraFilters.length > 0 ? { AND: extraFilters } : {},
       orderBy: { name: 'asc' },
-      select: {
-        id: true, name: true, nameEs: true, organization: true,
-        description: true, descriptionEs: true, categories: true,
-        address: true, phone: true, hours: true, latitude: true, longitude: true
-      }
+      select: selectFields,
     })
   }
 
-  return <ResourcesClient resources={resources as any[]} query={safeQ} category={category} />
+  return <ResourcesClient
+    resources={resources}
+    query={safeQ}
+    category={category}
+    insurance={insurance}
+    langFilter={langFilter}
+    accepting={accepting}
+  />
 }

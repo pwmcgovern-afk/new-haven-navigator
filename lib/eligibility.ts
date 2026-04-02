@@ -27,91 +27,115 @@ export interface ResourceWithEligibility {
   howToApply?: string | null
 }
 
+export interface MatchReason {
+  type: 'match' | 'warning' | 'disqualify'
+  message: string
+}
+
 /**
- * Check if a user matches a resource's eligibility criteria
- * Returns a score from 0-100 indicating match strength
+ * Calculate eligibility score with hard/soft rules and match reasons.
+ * Hard rules (disqualify): referral required, wrong housing status for homeless-only services,
+ *   income way over limit (>50% over).
+ * Soft rules (reduce score): income slightly over, category mismatch, no population match.
+ * Bonus: matching populations, category match, insurance match.
  */
 export function calculateEligibilityScore(
   user: UserProfile,
   resource: ResourceWithEligibility
-): number {
+): { score: number; reasons: MatchReason[] } {
   const eligibility = resource.eligibility as EligibilityCriteria | null
+  const reasons: MatchReason[] = []
 
   // If no eligibility criteria, assume everyone qualifies
   if (!eligibility) {
-    return 100
+    if (resource.categories.some(c => user.categoriesNeeded.includes(c))) {
+      reasons.push({ type: 'match', message: 'Category match' })
+    }
+    return { score: 100, reasons }
   }
 
   let score = 100
   let disqualified = false
 
-  // Check income limit
+  // HARD RULE: Income limit
   if (eligibility.incomeLimitPctFpl) {
     const annualIncome = user.monthlyIncome * 12
     const userPctFpl = calculatePctFPL(annualIncome, user.householdSize)
 
-    if (userPctFpl > eligibility.incomeLimitPctFpl) {
-      // Over income limit - might still be close
+    if (userPctFpl <= eligibility.incomeLimitPctFpl) {
+      reasons.push({ type: 'match', message: `Income within ${eligibility.incomeLimitPctFpl}% FPL limit` })
+    } else {
       const overBy = userPctFpl - eligibility.incomeLimitPctFpl
       if (overBy > 50) {
         disqualified = true
+        reasons.push({ type: 'disqualify', message: `Income exceeds ${eligibility.incomeLimitPctFpl}% FPL limit` })
       } else {
-        score -= overBy // Reduce score by how much over
+        score -= overBy
+        reasons.push({ type: 'warning', message: `Income slightly over limit (${overBy}% over)` })
       }
     }
   }
 
-  // Check housing status match
+  // HARD RULE: Housing status
   if (eligibility.housingStatus && eligibility.housingStatus.length > 0) {
-    if (!eligibility.housingStatus.includes(user.housingStatus)) {
-      // Some programs are only for homeless - hard disqualify
-      if (eligibility.housingStatus.includes('homeless') &&
-          !eligibility.housingStatus.includes('housed')) {
+    if (eligibility.housingStatus.includes(user.housingStatus)) {
+      reasons.push({ type: 'match', message: 'Housing status matches' })
+    } else {
+      // If resource only serves homeless and user is housed — hard disqualify
+      if (eligibility.housingStatus.length === 1 && eligibility.housingStatus[0] === 'homeless') {
         disqualified = true
+        reasons.push({ type: 'disqualify', message: 'Only serves currently homeless individuals' })
       } else {
         score -= 20
+        reasons.push({ type: 'warning', message: 'Housing status may not match' })
       }
     }
   }
 
-  // Check population match - bonus points for matching
+  // SOFT RULE: Population match — bonus for matching, no penalty for not
   if (eligibility.populations && eligibility.populations.length > 0) {
-    const matchingPops = eligibility.populations.filter(p =>
-      user.populations.includes(p)
-    )
-
+    const matchingPops = eligibility.populations.filter(p => user.populations.includes(p))
     if (matchingPops.length > 0) {
-      score += 10 // Bonus for matching special populations
+      score += 15
+      reasons.push({ type: 'match', message: `Serves: ${matchingPops.join(', ')}` })
     }
   }
 
-  // Check category match
-  const categoryMatch = resource.categories.some(c =>
-    user.categoriesNeeded.includes(c)
-  )
-  if (!categoryMatch && user.categoriesNeeded.length > 0) {
-    score -= 30
+  // Category match — strong signal
+  const categoryMatch = resource.categories.some(c => user.categoriesNeeded.includes(c))
+  if (categoryMatch) {
+    score += 10
+    reasons.push({ type: 'match', message: 'Category matches your needs' })
+  } else if (user.categoriesNeeded.length > 0) {
+    score -= 25
+    reasons.push({ type: 'warning', message: 'Not in your selected categories' })
+  }
+
+  // Insurance match (if we have data)
+  if (eligibility.insuranceRequired === true && user.insuranceStatus === 'uninsured') {
+    score -= 15
+    reasons.push({ type: 'warning', message: 'May require insurance' })
   }
 
   if (disqualified) {
-    return 0
+    return { score: 0, reasons }
   }
 
-  return Math.max(0, Math.min(100, score))
+  return { score: Math.max(0, Math.min(115, score)), reasons }
 }
 
 /**
- * Filter and rank resources for a user
+ * Filter and rank resources for a user, including match reasons
  */
 export function filterAndRankResources(
   user: UserProfile,
   resources: ResourceWithEligibility[]
-): Array<ResourceWithEligibility & { score: number }> {
+): Array<ResourceWithEligibility & { score: number; matchReasons: MatchReason[] }> {
   return resources
-    .map(resource => ({
-      ...resource,
-      score: calculateEligibilityScore(user, resource)
-    }))
+    .map(resource => {
+      const { score, reasons } = calculateEligibilityScore(user, resource)
+      return { ...resource, score, matchReasons: reasons }
+    })
     .filter(r => r.score > 0)
     .sort((a, b) => b.score - a.score)
 }

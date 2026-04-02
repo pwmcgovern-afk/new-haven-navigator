@@ -6,6 +6,8 @@ import LanguageToggle from '@/components/LanguageToggle'
 import { getCategoryInfo } from '@/lib/categories'
 import { getTranslation } from '@/lib/translations'
 
+import type { MatchReason } from '@/lib/eligibility'
+
 interface Resource {
   id: string
   name: string
@@ -17,6 +19,7 @@ interface Resource {
   address?: string | null
   phone?: string | null
   score: number
+  matchReasons?: MatchReason[]
 }
 
 interface Props {
@@ -142,6 +145,20 @@ export default function ResultsClient({ resources, selectedCategories }: Props) 
                   <p className="text-sm text-[var(--color-text-secondary)] line-clamp-2">{description}</p>
                   {resource.phone && (
                     <p className="text-sm text-[var(--color-primary)] mt-2 font-medium">{resource.phone}</p>
+                  )}
+                  {resource.matchReasons && resource.matchReasons.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      {resource.matchReasons.filter(r => r.type === 'match').slice(0, 3).map((reason, i) => (
+                        <span key={i} className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: 'var(--color-success-light)', color: 'var(--color-success)' }}>
+                          {reason.message}
+                        </span>
+                      ))}
+                      {resource.matchReasons.filter(r => r.type === 'warning').slice(0, 2).map((reason, i) => (
+                        <span key={i} className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: '#fef3c7', color: '#92400e' }}>
+                          {reason.message}
+                        </span>
+                      ))}
+                    </div>
                   )}
                 </Link>
               )
