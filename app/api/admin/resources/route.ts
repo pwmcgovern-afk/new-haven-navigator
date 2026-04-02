@@ -96,6 +96,11 @@ export async function POST(req: Request) {
       }
     })
 
+    // Log creation
+    await prisma.changeLog.create({
+      data: { resourceId: resource.id, resourceName: resource.name, action: 'created' }
+    })
+
     return Response.json({ success: true, resource }, { status: 201 })
   } catch (error) {
     console.error('Admin resources POST error:', error)

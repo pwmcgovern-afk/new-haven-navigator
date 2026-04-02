@@ -28,6 +28,11 @@ export default async function AdminDashboard() {
     }),
   ])
 
+  const recentChanges = await prisma.changeLog.findMany({
+    orderBy: { createdAt: 'desc' },
+    take: 10,
+  })
+
   const unhelpfulFeedback = totalFeedback - helpfulFeedback
 
   return (
@@ -81,6 +86,37 @@ export default async function AdminDashboard() {
           Review Stale
         </a>
       </div>
+
+      {/* Recent Activity */}
+      {recentChanges.length > 0 && (
+        <>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4 mt-8">Recent Activity</h2>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <table className="w-full text-sm">
+              <tbody className="divide-y divide-gray-100">
+                {recentChanges.map((log) => (
+                  <tr key={log.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3">
+                      <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
+                        log.action === 'created' ? 'bg-green-100 text-green-700' :
+                        log.action === 'deleted' ? 'bg-red-100 text-red-700' :
+                        log.action === 'verified' ? 'bg-blue-100 text-blue-700' :
+                        'bg-yellow-100 text-yellow-700'
+                      }`}>
+                        {log.action}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 font-medium text-gray-900">{log.resourceName}</td>
+                    <td className="px-4 py-3 text-xs text-gray-400">
+                      {new Date(log.createdAt).toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
     </div>
   )
 }

@@ -108,3 +108,27 @@ model TrackerEntry {
   @@index([userId])
   @@index([resourceId])
 }
+
+model ChangeLog {
+  id           String   @id @default(uuid())
+  resourceId   String
+  resourceName String
+  action       String   // "created", "updated", "deleted", "verified"
+  changes      Json?    // { field: { from: old, to: new } }
+  createdAt    DateTime @default(now())
+
+  @@index([resourceId])
+  @@index([createdAt(sort: Desc)])
+}
+
+model PageView {
+  id         String   @id @default(uuid())
+  path       String
+  resourceId String?
+  category   String?
+  createdAt  DateTime @default(now())
+
+  @@index([path])
+  @@index([resourceId])
+  @@index([createdAt(sort: Desc)])
+}

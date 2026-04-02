@@ -133,6 +133,22 @@ export default function TrackerClient() {
       </header>
 
       <main className="px-5 py-6 fade-in" role="main" id="main-content">
+        {/* Share list link */}
+        {entries.length > 0 && (
+          <div className="mb-4 print-hide">
+            <a
+              href={`/list?ids=${entries.map(e => e.resourceId).join(',')}&title=${encodeURIComponent(language === 'es' ? 'Mis Recursos' : 'My Resources')}`}
+              className="text-sm font-medium inline-flex items-center gap-1.5"
+              style={{ color: 'var(--color-primary)' }}
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+              </svg>
+              {language === 'es' ? 'Compartir mi lista' : 'Share my list'}
+            </a>
+          </div>
+        )}
+
         {entries.length === 0 ? (
           /* Empty State */
           <div className="text-center py-16" role="status">

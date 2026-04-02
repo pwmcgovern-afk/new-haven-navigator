@@ -24,6 +24,12 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   try {
     const body = await req.json()
 
+    // Fetch current resource to compute changes
+    const before = await prisma.resource.findUnique({ where: { id: params.id } })
+    if (!before) {
+      return Response.json({ error: 'Not found' }, { status: 404 })
+    }
+
     const resource = await prisma.resource.update({
       where: { id: params.id },
       data: {
@@ -50,6 +56,20 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       }
     })
 
+    // Log the changes
+    const changes: Record<string, { from: unknown; to: unknown }> = {}
+    const trackFields = ['name', 'organization', 'description', 'categories', 'address', 'phone', 'website', 'hours', 'howToApply', 'nameEs', 'descriptionEs']
+    for (const field of trackFields) {
+      if (body[field] !== undefined && JSON.stringify((before as Record<string, unknown>)[field]) !== JSON.stringify(body[field])) {
+        changes[field] = { from: (before as Record<string, unknown>)[field], to: body[field] }
+      }
+    }
+    if (Object.keys(changes).length > 0) {
+      await prisma.changeLog.create({
+        data: { resourceId: params.id, resourceName: resource.name, action: 'updated', changes }
+      })
+    }
+
     return Response.json({ success: true, resource })
   } catch (error) {
     console.error('Admin resource PUT error:', error)
@@ -62,7 +82,17 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
   if (authError) return authError
 
   try {
-    // Delete associated feedback first
+    // Log deletion before removing
+    const resource = await prisma.resource.findUnique({
+      where: { id: params.id },
+      select: { name: true }
+    })
+    if (resource) {
+      await prisma.changeLog.create({
+        data: { resourceId: params.id, resourceName: resource.name, action: 'deleted' }
+      })
+    }
+
     await prisma.feedback.deleteMany({ where: { resourceId: params.id } })
     await prisma.resource.delete({ where: { id: params.id } })
 

@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useLanguage } from '@/components/LanguageContext'
 import LanguageToggle from '@/components/LanguageToggle'
 import { isOpenNow } from '@/lib/hoursParser'
 import { getCategoriesForLanguage, getCategoryInfo } from '@/lib/categories'
+import { getDistanceMiles } from '@/lib/geo'
 
 interface Resource {
   id: string
@@ -18,6 +19,8 @@ interface Resource {
   address: string | null
   phone: string | null
   hours: string | null
+  latitude: number | null
+  longitude: number | null
 }
 
 interface Props {
@@ -66,16 +69,47 @@ export default function ResourcesClient({ resources, query, category }: Props) {
   const t = content[language]
   const cats = getCategoriesForLanguage(language)
   const [openNowFilter, setOpenNowFilter] = useState(false)
+  const [nearbySort, setNearbySort] = useState(false)
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
+  const [locationError, setLocationError] = useState(false)
 
   const getCatName = (slug: string) => getCategoryInfo(slug, language)?.name || slug
 
-  // Filter by "Open Now" if enabled
-  const filteredResources = openNowFilter
-    ? resources.filter(r => {
-        const status = isOpenNow(r.hours)
-        return status !== false
-      })
+  const handleNearbyToggle = useCallback(() => {
+    if (nearbySort) {
+      setNearbySort(false)
+      return
+    }
+    if (userLocation) {
+      setNearbySort(true)
+      return
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude })
+        setNearbySort(true)
+        setLocationError(false)
+      },
+      () => setLocationError(true),
+      { enableHighAccuracy: false, timeout: 10000 }
+    )
+  }, [nearbySort, userLocation])
+
+  // Filter and sort
+  let filteredResources = openNowFilter
+    ? resources.filter(r => isOpenNow(r.hours) !== false)
     : [...resources]
+
+  if (nearbySort && userLocation) {
+    filteredResources = filteredResources
+      .map(r => ({
+        ...r,
+        distance: r.latitude && r.longitude
+          ? getDistanceMiles(userLocation.lat, userLocation.lng, r.latitude, r.longitude)
+          : 999,
+      }))
+      .sort((a, b) => a.distance - b.distance)
+  }
 
   return (
     <div className="min-h-screen">
@@ -135,6 +169,13 @@ export default function ResourcesClient({ resources, query, category }: Props) {
             >
               <span className="mr-1" aria-hidden="true">🕐</span> {t.openNow}
             </button>
+            <button
+              onClick={handleNearbyToggle}
+              className={`category-pill whitespace-nowrap ${nearbySort ? 'active' : ''}`}
+              aria-pressed={nearbySort}
+            >
+              <span className="mr-1" aria-hidden="true">📍</span> {language === 'es' ? 'Cerca' : 'Near Me'}
+            </button>
             {cats.map((cat) => (
               <Link
                 key={cat.slug}
@@ -147,6 +188,12 @@ export default function ResourcesClient({ resources, query, category }: Props) {
             ))}
           </div>
         </nav>
+
+        {locationError && (
+          <p className="text-xs mb-2" style={{ color: 'var(--color-error)' }}>
+            {language === 'es' ? 'No se pudo obtener su ubicacion' : 'Could not get your location'}
+          </p>
+        )}
 
         {/* Results count - announced to screen readers */}
         <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }} role="status" aria-live="polite">
@@ -180,9 +227,16 @@ export default function ResourcesClient({ resources, query, category }: Props) {
                         <p className="text-sm mb-2" style={{ color: 'var(--color-text-secondary)' }}>{resource.organization}</p>
                       )}
                       <p className="text-sm line-clamp-2" style={{ color: 'var(--color-text-secondary)' }}>{description}</p>
-                      {resource.phone && (
-                        <p className="text-sm mt-2 font-medium" style={{ color: 'var(--color-primary)' }}>{resource.phone}</p>
-                      )}
+                      <div className="flex items-center gap-3 mt-2">
+                        {resource.phone && (
+                          <p className="text-sm font-medium" style={{ color: 'var(--color-primary)' }}>{resource.phone}</p>
+                        )}
+                        {'distance' in resource && typeof resource.distance === 'number' && resource.distance < 100 && (
+                          <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                            {resource.distance.toFixed(1)} mi
+                          </span>
+                        )}
+                      </div>
                     </Link>
                   </li>
                 )

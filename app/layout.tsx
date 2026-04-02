@@ -7,6 +7,7 @@ import AppFooter from '@/components/AppFooter'
 import ChatWidget from '@/components/ChatWidget'
 import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration'
 import { Analytics } from '@vercel/analytics/react'
+import PageViewTracker from '@/components/PageViewTracker'
 
 export const metadata: Metadata = {
   title: 'New Haven Navigator',
@@ -57,6 +58,7 @@ export default function RootLayout({
             <ServiceWorkerRegistration />
           </TrackerProvider>
           <Analytics />
+          <PageViewTracker />
         </LanguageProvider>
       </body>
     </html>
