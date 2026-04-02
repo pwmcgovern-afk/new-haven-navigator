@@ -17,6 +17,7 @@ function AdminNav() {
             <a href="/admin/resources" className="text-gray-300 hover:text-white transition-colors">Resources</a>
             <a href="/admin/feedback" className="text-gray-300 hover:text-white transition-colors">Feedback</a>
             <a href="/admin/imports" className="text-gray-300 hover:text-white transition-colors">Imports</a>
+            <a href="/admin/suggestions" className="text-gray-300 hover:text-white transition-colors">Suggestions</a>
             <a href="/admin/usage" className="text-gray-300 hover:text-white transition-colors">Usage</a>
           </div>
         </div>

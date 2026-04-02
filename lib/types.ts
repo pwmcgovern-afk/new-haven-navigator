@@ -26,6 +26,13 @@ export interface Resource {
   website: string | null
   email: string | null
   hours: string | null
+  // Healthcare-specific
+  languages: string[]
+  insuranceAccepted: string[]
+  cost: string | null
+  acceptingClients: boolean
+  waitTime: string | null
+  referralRequired: boolean
   eligibility: EligibilityCriteria | null
   howToApply: string | null
   tips: string[]
@@ -36,6 +43,7 @@ export interface Resource {
   tipsEs: string[]
   source: string
   sourceId: string | null
+  verificationMethod: string | null
   verifiedAt: Date | null
   createdAt: Date
   updatedAt: Date

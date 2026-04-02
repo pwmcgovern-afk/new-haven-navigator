@@ -15,7 +15,6 @@ model Resource {
   organization String?
   description String
 
-  // Categories (stored as array)
   categories  String[]
 
   // Location
@@ -31,6 +30,14 @@ model Resource {
   website     String?
   email       String?
   hours       String?
+
+  // Healthcare-specific fields
+  languages         String[]  @default([])
+  insuranceAccepted String[]  @default([])
+  cost              String?
+  acceptingClients  Boolean   @default(true)
+  waitTime          String?
+  referralRequired  Boolean   @default(false)
 
   // Eligibility criteria (JSON for flexibility)
   eligibility Json?
@@ -48,8 +55,9 @@ model Resource {
   tipsEs        String[]
 
   // Data source tracking
-  source      String   @default("manual")
-  sourceId    String?
+  source             String   @default("manual")
+  sourceId           String?
+  verificationMethod String?  // "staff_call", "web_check", "org_confirmed", "211_import", "user_reported"
 
   // Full-text search (managed by DB trigger)
   search_vector Unsupported("tsvector")?
@@ -97,6 +105,7 @@ model TrackerEntry {
   resourceNameEs   String?
   organizationName String?
   status           String   @default("reached_out")
+  outcome          String   @default("")  // "connected", "waitlisted", "denied", "no_response"
   contactPerson    String   @default("")
   dateContacted    String   @default("")
   notes            String   @default("")
@@ -109,12 +118,39 @@ model TrackerEntry {
   @@index([resourceId])
 }
 
+model Suggestion {
+  id             String    @id @default(uuid())
+  resourceId     String?   // null for new resource suggestions
+  type           String    @default("update")  // "update" or "new"
+  submitterName  String?
+  submitterEmail String?
+  submitterOrg   String?
+  changes        Json      // proposed changes or full new resource data
+  status         String    @default("pending")  // "pending", "approved", "rejected"
+  adminNotes     String?
+  createdAt      DateTime  @default(now())
+  reviewedAt     DateTime?
+
+  @@index([status])
+  @@index([createdAt(sort: Desc)])
+}
+
+model AdminUser {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  name         String
+  role         String    @default("editor")  // "admin", "editor", "viewer"
+  createdAt    DateTime  @default(now())
+  lastLoginAt  DateTime?
+}
+
 model ChangeLog {
   id           String   @id @default(uuid())
   resourceId   String
   resourceName String
-  action       String   // "created", "updated", "deleted", "verified"
-  changes      Json?    // { field: { from: old, to: new } }
+  action       String
+  changes      Json?
   createdAt    DateTime @default(now())
 
   @@index([resourceId])

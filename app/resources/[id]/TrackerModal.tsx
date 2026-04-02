@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { statusConfig, type TrackerStatus } from '@/lib/trackerTypes'
+import { statusConfig, outcomeConfig, type TrackerStatus, type TrackerOutcome } from '@/lib/trackerTypes'
 import type { Language } from '@/lib/translations'
 
 interface TrackerModalProps {
@@ -7,6 +7,7 @@ interface TrackerModalProps {
   onClose: () => void
   onSave: (data: {
     status: TrackerStatus
+    outcome: TrackerOutcome
     contactPerson: string
     dateContacted: string
     notes: string
@@ -14,6 +15,7 @@ interface TrackerModalProps {
   onDelete?: () => void
   existingData?: {
     status: TrackerStatus
+    outcome: TrackerOutcome
     contactPerson: string
     dateContacted: string
     notes: string
@@ -45,6 +47,7 @@ export default function TrackerModal({
 }: TrackerModalProps) {
   const modalRef = useRef<HTMLDivElement>(null)
   const [formStatus, setFormStatus] = useState<TrackerStatus>(existingData?.status || 'reached_out')
+  const [formOutcome, setFormOutcome] = useState<TrackerOutcome>(existingData?.outcome || '')
   const [formContact, setFormContact] = useState(existingData?.contactPerson || '')
   const [formDate, setFormDate] = useState(existingData?.dateContacted || new Date().toISOString().split('T')[0])
   const [formNotes, setFormNotes] = useState(existingData?.notes || '')
@@ -53,6 +56,7 @@ export default function TrackerModal({
   useEffect(() => {
     if (isOpen) {
       setFormStatus(existingData?.status || 'reached_out')
+      setFormOutcome(existingData?.outcome || '')
       setFormContact(existingData?.contactPerson || '')
       setFormDate(existingData?.dateContacted || new Date().toISOString().split('T')[0])
       setFormNotes(existingData?.notes || '')
@@ -139,6 +143,28 @@ export default function TrackerModal({
           </div>
         </fieldset>
 
+        {/* Outcome */}
+        <fieldset className="mb-4">
+          <legend className="text-xs font-semibold uppercase tracking-wider mb-2 block" style={{ color: 'var(--color-text-secondary)' }}>
+            {language === 'es' ? 'Resultado' : 'Outcome'} <span style={{ color: 'var(--color-text-muted)' }}>({t.optional})</span>
+          </legend>
+          <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label={language === 'es' ? 'Resultado' : 'Outcome'}>
+            {(Object.keys(outcomeConfig) as TrackerOutcome[]).filter(o => o !== '').map((outcome) => (
+              <button
+                key={outcome}
+                onClick={() => setFormOutcome(formOutcome === outcome ? '' : outcome)}
+                className={`selection-btn text-center py-2 ${formOutcome === outcome ? 'selected' : ''}`}
+                role="radio"
+                aria-checked={formOutcome === outcome}
+              >
+                <span className="font-medium text-xs">
+                  {outcomeConfig[outcome][language]}
+                </span>
+              </button>
+            ))}
+          </div>
+        </fieldset>
+
         {/* Contact Person */}
         <div className="mb-4">
           <label htmlFor="contact-person-input" className="text-xs font-semibold uppercase tracking-wider mb-2 block" style={{ color: 'var(--color-text-secondary)' }}>
@@ -198,7 +224,7 @@ export default function TrackerModal({
             {t.cancel}
           </button>
           <button
-            onClick={() => onSave({ status: formStatus, contactPerson: formContact, dateContacted: formDate, notes: formNotes })}
+            onClick={() => onSave({ status: formStatus, outcome: formOutcome, contactPerson: formContact, dateContacted: formDate, notes: formNotes })}
             className="flex-1 btn-primary"
           >
             {t.save}

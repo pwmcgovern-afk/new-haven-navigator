@@ -7,7 +7,7 @@ import ShareButton from '@/components/ShareButton'
 import LanguageToggle from '@/components/LanguageToggle'
 import { useLanguage } from '@/components/LanguageContext'
 import { useTracker } from '@/components/TrackerContext'
-import type { TrackerStatus } from '@/lib/trackerTypes'
+import type { TrackerStatus, TrackerOutcome } from '@/lib/trackerTypes'
 import { getCategoryInfo } from '@/lib/categories'
 import type { Resource } from '@/lib/types'
 import TrackerModal from './TrackerModal'
@@ -143,7 +143,7 @@ export default function ResourceDetailClient({ resource }: Props) {
   const translateHousing = (s: string) => t[s as keyof typeof t] || s
   const translatePopulation = (p: string) => t[p as keyof typeof t] || p
 
-  const handleSave = (formData: { status: TrackerStatus; contactPerson: string; dateContacted: string; notes: string }) => {
+  const handleSave = (formData: { status: TrackerStatus; outcome: TrackerOutcome; contactPerson: string; dateContacted: string; notes: string }) => {
     if (existingEntry) {
       updateEntry(existingEntry.id, formData)
     } else {
@@ -203,6 +203,52 @@ export default function ResourceDetailClient({ resource }: Props) {
         <h1 className="text-2xl font-semibold mb-1">{name}</h1>
         {resource.organization && resource.organization !== resource.name && (
           <p style={{ color: 'var(--color-text-secondary)' }}>{resource.organization}</p>
+        )}
+
+        {/* Quick Info Badges */}
+        <div className="flex flex-wrap gap-2 mt-3">
+          {resource.acceptingClients === false ? (
+            <span className="text-xs font-medium px-2 py-1 rounded-full" style={{ background: '#fef2f2', color: '#dc2626' }}>
+              {language === 'es' ? 'No acepta clientes' : 'Not accepting clients'}
+            </span>
+          ) : (
+            <span className="text-xs font-medium px-2 py-1 rounded-full" style={{ background: 'var(--color-success-light)', color: 'var(--color-success)' }}>
+              {language === 'es' ? 'Aceptando clientes' : 'Accepting clients'}
+            </span>
+          )}
+          {resource.cost && (
+            <span className="text-xs font-medium px-2 py-1 rounded-full" style={{ background: 'var(--color-primary-light)', color: 'var(--color-primary)' }}>
+              {resource.cost === 'Free' ? (language === 'es' ? 'Gratis' : 'Free') : resource.cost}
+            </span>
+          )}
+          {resource.referralRequired && (
+            <span className="text-xs font-medium px-2 py-1 rounded-full" style={{ background: '#fef3c7', color: '#92400e' }}>
+              {language === 'es' ? 'Requiere referencia' : 'Referral required'}
+            </span>
+          )}
+          {resource.waitTime && (
+            <span className="text-xs font-medium px-2 py-1 rounded-full" style={{ background: 'var(--color-border)', color: 'var(--color-text-secondary)' }}>
+              {language === 'es' ? 'Espera: ' : 'Wait: '}{resource.waitTime}
+            </span>
+          )}
+        </div>
+
+        {/* Languages & Insurance */}
+        {(resource.languages?.length > 0 || resource.insuranceAccepted?.length > 0) && (
+          <div className="flex flex-wrap gap-4 mt-4 text-sm">
+            {resource.languages?.length > 0 && (
+              <div>
+                <span style={{ color: 'var(--color-text-muted)' }}>{language === 'es' ? 'Idiomas: ' : 'Languages: '}</span>
+                <span>{resource.languages.join(', ')}</span>
+              </div>
+            )}
+            {resource.insuranceAccepted?.length > 0 && (
+              <div>
+                <span style={{ color: 'var(--color-text-muted)' }}>{language === 'es' ? 'Seguro: ' : 'Insurance: '}</span>
+                <span>{resource.insuranceAccepted.join(', ')}</span>
+              </div>
+            )}
+          </div>
         )}
 
         {/* About */}
@@ -387,6 +433,7 @@ export default function ResourceDetailClient({ resource }: Props) {
           onDelete={existingEntry ? handleDelete : undefined}
           existingData={existingEntry ? {
             status: existingEntry.status,
+            outcome: (existingEntry.outcome || '') as TrackerOutcome,
             contactPerson: existingEntry.contactPerson,
             dateContacted: existingEntry.dateContacted,
             notes: existingEntry.notes,
@@ -412,7 +459,7 @@ export default function ResourceDetailClient({ resource }: Props) {
 
         {/* Verification & Report */}
         <div className="mt-4 flex items-center justify-between">
-          <FreshnessBadge verifiedAt={resource.verifiedAt} />
+          <FreshnessBadge verifiedAt={resource.verifiedAt} verificationMethod={resource.verificationMethod} />
           <a
             href={`mailto:pwmcgovern@gmail.com?subject=${encodeURIComponent(`${t.reportIssueSubject} ${resource.name}`)}&body=${encodeURIComponent(`Resource: ${resource.name}\nID: ${resource.id}\n\nIssue:\n`)}`}
             className="text-xs font-medium flex items-center gap-1 btn-touch"
