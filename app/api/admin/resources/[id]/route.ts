@@ -66,7 +66,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     }
     if (Object.keys(changes).length > 0) {
       await prisma.changeLog.create({
-        data: { resourceId: params.id, resourceName: resource.name, action: 'updated', changes: changes as unknown as Record<string, unknown> }
+        data: { resourceId: params.id, resourceName: resource.name, action: 'updated', changes: JSON.parse(JSON.stringify(changes)) }
       })
     }
 
