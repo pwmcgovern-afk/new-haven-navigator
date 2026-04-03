@@ -24,8 +24,8 @@ function isValidAdminSession(cookieValue: string | undefined): boolean {
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Admin route protection (except login page and auth API)
-  if (pathname.startsWith('/admin') && pathname !== '/admin/login') {
+  // Admin page protection (API routes handle their own auth via requireAdmin)
+  if (pathname.startsWith('/admin') && !pathname.startsWith('/api/') && pathname !== '/admin/login') {
     const sessionCookie = request.cookies.get(COOKIE_NAME)?.value
     if (!isValidAdminSession(sessionCookie)) {
       return NextResponse.redirect(new URL('/admin/login', request.url))
