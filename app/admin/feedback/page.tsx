@@ -1,6 +1,8 @@
 import { prisma } from '@/lib/db'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 interface FeedbackRow {
   resourceId: string
   name: string | null

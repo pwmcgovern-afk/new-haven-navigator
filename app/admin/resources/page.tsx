@@ -1,5 +1,7 @@
 import { prisma } from '@/lib/db'
 import { Prisma } from '@prisma/client'
+
+export const dynamic = 'force-dynamic'
 import { CATEGORIES_I18N } from '@/lib/categories'
 import Link from 'next/link'
 

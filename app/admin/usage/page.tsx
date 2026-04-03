@@ -1,5 +1,7 @@
 import { prisma } from '@/lib/db'
 
+export const dynamic = 'force-dynamic'
+
 interface ViewCount {
   path: string
   count: bigint | number
