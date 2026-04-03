@@ -1,10 +1,6 @@
-import type { Metadata } from 'next'
-import '../globals.css'
+'use client'
 
-export const metadata: Metadata = {
-  title: 'Admin — New Haven Navigator',
-  robots: 'noindex, nofollow',
-}
+import '../globals.css'
 
 function AdminNav() {
   return (
