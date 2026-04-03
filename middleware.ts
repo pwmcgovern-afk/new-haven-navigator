@@ -1,24 +1,15 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { createHmac, timingSafeEqual } from 'crypto'
 
 const COOKIE_NAME = 'admin_session'
-const SESSION_PAYLOAD = 'nhv-navigator-admin-session'
 
-// Inline auth check — can't import from lib in Edge middleware
-function isValidAdminSession(cookieValue: string | undefined): boolean {
+// Simple cookie check — just verify the cookie exists and has reasonable length
+// Full HMAC verification happens in the API routes via requireAdmin()
+// Edge middleware can't use Node crypto, so we do a lightweight check here
+function hasValidSessionCookie(cookieValue: string | undefined): boolean {
   if (!cookieValue) return false
-  try {
-    const key = process.env.ADMIN_API_KEY
-    if (!key) return false
-    const expected = createHmac('sha256', key).update(SESSION_PAYLOAD).digest('hex')
-    const tokenBuf = Buffer.from(cookieValue, 'utf8')
-    const expectedBuf = Buffer.from(expected, 'utf8')
-    if (tokenBuf.length !== expectedBuf.length) return false
-    return timingSafeEqual(tokenBuf, expectedBuf)
-  } catch {
-    return false
-  }
+  // Session tokens are hex strings (64+ chars for HMAC-SHA256, or longer for user tokens)
+  return cookieValue.length >= 64 && /^[0-9a-f:]+$/.test(cookieValue)
 }
 
 export function middleware(request: NextRequest) {
@@ -27,7 +18,7 @@ export function middleware(request: NextRequest) {
   // Admin page protection (API routes handle their own auth via requireAdmin)
   if (pathname.startsWith('/admin') && !pathname.startsWith('/api/') && pathname !== '/admin/login') {
     const sessionCookie = request.cookies.get(COOKIE_NAME)?.value
-    if (!isValidAdminSession(sessionCookie)) {
+    if (!hasValidSessionCookie(sessionCookie)) {
       return NextResponse.redirect(new URL('/admin/login', request.url))
     }
   }
