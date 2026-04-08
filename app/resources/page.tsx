@@ -54,10 +54,9 @@ export default async function ResourcesPage({
 
       if (ids.length > 0) {
         resources = await prisma.resource.findMany({
-          where: {
-            id: { in: ids },
-            AND: extraFilters,
-          },
+          where: extraFilters.length > 0
+            ? { id: { in: ids }, AND: extraFilters }
+            : { id: { in: ids } },
           select: selectFields,
         })
         // Preserve FTS ranking order
@@ -68,7 +67,7 @@ export default async function ResourcesPage({
       }
     } else {
       resources = await prisma.resource.findMany({
-        where: { AND: extraFilters },
+        where: extraFilters.length > 0 ? { AND: extraFilters } : {},
         orderBy: { name: 'asc' },
         select: selectFields,
       })
