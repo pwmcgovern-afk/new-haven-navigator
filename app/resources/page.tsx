@@ -13,72 +13,49 @@ export default async function ResourcesPage({
   }
 }) {
   const { q, category, insurance, language: langFilter, accepting } = searchParams
-  const safeQ = q?.slice(0, 200)
+  const safeQ = q?.slice(0, 200)?.trim()
 
-  // Build Prisma where clause for non-FTS filters
-  const extraFilters: Prisma.ResourceWhereInput[] = []
-  if (category) extraFilters.push({ categories: { has: category } })
-  // Note: insurance, language, acceptingClients filters temporarily disabled
-  // while Prisma client rebuilds with the expanded Resource schema
+  // Build filter conditions
+  const conditions: Prisma.ResourceWhereInput[] = []
 
-  const selectFields = {
-    id: true, name: true, nameEs: true, organization: true,
-    description: true, descriptionEs: true, categories: true,
-    address: true, phone: true, hours: true, latitude: true, longitude: true,
-  }
-
-  let resources
-
-  if (safeQ && safeQ.trim().length > 0) {
-    const tsQuery = safeQ.trim().split(/\s+/)
-      .filter(w => w.length > 1)
-      .map(w => w.replace(/[^a-zA-Z0-9áéíóúñü]/g, ''))
-      .filter(Boolean)
-      .map(w => w + ':*')
-      .join(' & ')
-
-    if (tsQuery) {
-      // Full-text search — then apply extra filters in Prisma
-      const ftsResults = await prisma.$queryRaw`
-        SELECT id FROM "Resource"
-        WHERE (
-          "search_vector" @@ to_tsquery('english', ${tsQuery})
-          OR name ILIKE ${'%' + safeQ + '%'}
-          OR "nameEs" ILIKE ${'%' + safeQ + '%'}
-          OR organization ILIKE ${'%' + safeQ + '%'}
-        )
-        ORDER BY ts_rank("search_vector", to_tsquery('english', ${tsQuery})) DESC
-      ` as { id: string }[]
-
-      const ids = ftsResults.map(r => r.id)
-
-      if (ids.length > 0) {
-        resources = await prisma.resource.findMany({
-          where: extraFilters.length > 0
-            ? { id: { in: ids }, AND: extraFilters }
-            : { id: { in: ids } },
-          select: selectFields,
-        })
-        // Preserve FTS ranking order
-        const idOrder = new Map(ids.map((id, i) => [id, i]))
-        resources.sort((a, b) => (idOrder.get(a.id) ?? 999) - (idOrder.get(b.id) ?? 999))
-      } else {
-        resources = []
-      }
-    } else {
-      resources = await prisma.resource.findMany({
-        where: extraFilters.length > 0 ? { AND: extraFilters } : {},
-        orderBy: { name: 'asc' },
-        select: selectFields,
-      })
-    }
-  } else {
-    resources = await prisma.resource.findMany({
-      where: extraFilters.length > 0 ? { AND: extraFilters } : {},
-      orderBy: { name: 'asc' },
-      select: selectFields,
+  if (safeQ && safeQ.length > 0) {
+    conditions.push({
+      OR: [
+        { name: { contains: safeQ, mode: 'insensitive' } },
+        { nameEs: { contains: safeQ, mode: 'insensitive' } },
+        { description: { contains: safeQ, mode: 'insensitive' } },
+        { descriptionEs: { contains: safeQ, mode: 'insensitive' } },
+        { organization: { contains: safeQ, mode: 'insensitive' } },
+        { address: { contains: safeQ, mode: 'insensitive' } },
+      ]
     })
   }
+
+  if (category) conditions.push({ categories: { has: category } })
+  // Note: insurance, language, accepting filters temporarily disabled
+
+  const where: Prisma.ResourceWhereInput = conditions.length > 0
+    ? { AND: conditions }
+    : {}
+
+  const resources = await prisma.resource.findMany({
+    where,
+    orderBy: { name: 'asc' },
+    select: {
+      id: true,
+      name: true,
+      nameEs: true,
+      organization: true,
+      description: true,
+      descriptionEs: true,
+      categories: true,
+      address: true,
+      phone: true,
+      hours: true,
+      latitude: true,
+      longitude: true,
+    }
+  })
 
   return <ResourcesClient
     resources={resources}

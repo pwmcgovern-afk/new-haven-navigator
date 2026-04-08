@@ -1,6 +1,5 @@
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["fullTextSearch"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -59,8 +58,9 @@ model Resource {
   sourceId           String?
   verificationMethod String?  // "staff_call", "web_check", "org_confirmed", "211_import", "user_reported"
 
-  // Full-text search (managed by DB trigger)
-  search_vector Unsupported("tsvector")?
+  // Note: search_vector tsvector column exists in the DB and is maintained by
+  // a trigger, but it's omitted from the Prisma schema because Unsupported types
+  // were causing findUnique/findFirst to fail silently. Search uses raw SQL.
 
   // Timestamps
   verifiedAt  DateTime?
