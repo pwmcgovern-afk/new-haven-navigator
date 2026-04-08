@@ -3,22 +3,26 @@ import { prisma } from '@/lib/db'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const url = new URL(req.url)
+    const targetId = url.searchParams.get('id') || '032f60c5-3539-467a-89c7-6f432b64e287'
+
     const count = await prisma.resource.count()
-    const first = await prisma.resource.findMany({
-      take: 3,
-      select: { id: true, name: true }
-    })
 
-    // Try raw SQL with the same ID
-    const targetId = '061d9ff2-700e-40b2-8df3-eada3beb9244'
-    const rawResult = await prisma.$queryRaw<{ id: string; name: string }[]>(
-      Prisma.sql`SELECT id, name FROM "Resource" WHERE id = ${targetId}`
-    )
+    // Try raw SQL the same way the detail page does
+    let rawSqlResult: unknown[] = []
+    let rawSqlError: string | null = null
+    try {
+      rawSqlResult = await prisma.$queryRaw`
+        SELECT id, name FROM "Resource" WHERE id = ${targetId}
+      `
+    } catch (e) {
+      rawSqlError = e instanceof Error ? e.message : String(e)
+    }
 
-    // Try Prisma findUnique on the same ID
-    let findUniqueResult: { id: string; name: string } | null = null
+    // Try findUnique
+    let findUniqueResult: unknown = null
     let findUniqueError: string | null = null
     try {
       findUniqueResult = await prisma.resource.findUnique({
@@ -29,9 +33,19 @@ export async function GET() {
       findUniqueError = e instanceof Error ? e.message : String(e)
     }
 
-    // Extract more details about the connection
+    // Try findFirst
+    let findFirstResult: unknown = null
+    let findFirstError: string | null = null
+    try {
+      findFirstResult = await prisma.resource.findFirst({
+        where: { id: targetId },
+        select: { id: true, name: true }
+      })
+    } catch (e) {
+      findFirstError = e instanceof Error ? e.message : String(e)
+    }
+
     const dbUrl = process.env.DATABASE_URL || ''
-    // Pooler URL format: postgresql://postgres.PROJECT_REF:PASSWORD@aws-0-region.pooler.supabase.com:port/postgres
     const projectRefMatch = dbUrl.match(/postgres\.([a-z0-9]+):/)
     const hostMatch = dbUrl.match(/@([^:/]+)/)
 
@@ -39,11 +53,13 @@ export async function GET() {
       databaseHost: hostMatch?.[1] || 'unknown',
       projectRef: projectRefMatch?.[1] || 'unknown',
       count,
-      sampleIds: first,
       targetId,
-      rawSqlResult: rawResult,
+      rawSqlResult,
+      rawSqlError,
       findUniqueResult,
       findUniqueError,
+      findFirstResult,
+      findFirstError,
     })
   } catch (e) {
     return Response.json({
