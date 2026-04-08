@@ -29,8 +29,15 @@ export async function GET() {
       findUniqueError = e instanceof Error ? e.message : String(e)
     }
 
+    // Extract more details about the connection
+    const dbUrl = process.env.DATABASE_URL || ''
+    // Pooler URL format: postgresql://postgres.PROJECT_REF:PASSWORD@aws-0-region.pooler.supabase.com:port/postgres
+    const projectRefMatch = dbUrl.match(/postgres\.([a-z0-9]+):/)
+    const hostMatch = dbUrl.match(/@([^:/]+)/)
+
     return Response.json({
-      databaseUrl: process.env.DATABASE_URL?.split('@')[1]?.split('/')[0] || 'unknown',
+      databaseHost: hostMatch?.[1] || 'unknown',
+      projectRef: projectRefMatch?.[1] || 'unknown',
       count,
       sampleIds: first,
       targetId,
