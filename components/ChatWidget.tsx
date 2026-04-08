@@ -72,10 +72,32 @@ export default function ChatWidget() {
     setMessages,
     error,
     reload,
+    append,
   } = useChat({
     body: { language },
     initialMessages: [welcomeMessage],
   })
+
+  // Starter suggestions shown before the user types anything
+  const suggestions = language === 'es' ? [
+    { icon: '🏠', label: 'Necesito ayuda con vivienda' },
+    { icon: '🍎', label: 'Necesito comida' },
+    { icon: '🏥', label: 'Necesito atencion medica' },
+    { icon: '🧠', label: 'Necesito apoyo de salud mental' },
+    { icon: '💵', label: 'Necesito ayuda financiera' },
+    { icon: '⚖️', label: 'Necesito ayuda legal' },
+  ] : [
+    { icon: '🏠', label: 'I need housing help' },
+    { icon: '🍎', label: 'I need food' },
+    { icon: '🏥', label: 'I need healthcare' },
+    { icon: '🧠', label: 'I need mental health support' },
+    { icon: '💵', label: 'I need cash assistance' },
+    { icon: '⚖️', label: 'I need legal help' },
+  ]
+
+  const handleSuggestionClick = (text: string) => {
+    append({ role: 'user', content: text })
+  }
 
   // Reset messages when language changes
   useEffect(() => {
@@ -225,6 +247,27 @@ export default function ChatWidget() {
                   </div>
                 </div>
               ))}
+
+              {/* Starter suggestion chips — only shown before user types anything */}
+              {messages.length === 1 && !isLoading && (
+                <div className="flex flex-col gap-2 pt-2">
+                  {suggestions.map((s, i) => (
+                    <button
+                      key={i}
+                      onClick={() => handleSuggestionClick(s.label)}
+                      className="text-left text-sm px-4 py-2.5 rounded-2xl transition-colors hover:opacity-80"
+                      style={{
+                        background: 'var(--color-surface)',
+                        border: '1.5px solid var(--color-border)',
+                        color: 'var(--color-text)',
+                      }}
+                    >
+                      <span className="mr-2" aria-hidden="true">{s.icon}</span>
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+              )}
               {isLoading && (
                 <div className="flex justify-start">
                   <div
