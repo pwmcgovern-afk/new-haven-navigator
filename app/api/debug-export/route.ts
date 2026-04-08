@@ -16,16 +16,16 @@ export async function GET() {
     // Use raw SQL for everything to bypass any Prisma deserialization issues
     // with the expanded schema fields and the search_vector tsvector column.
 
+    // The production DB has the OLD schema — no healthcare-specific columns.
+    // Only select columns we know exist there.
     const resources = await prisma.$queryRaw<Record<string, unknown>[]>`
       SELECT
         id, name, organization, description, categories,
         address, city, state, zip, latitude, longitude,
         phone, website, email, hours,
-        languages, "insuranceAccepted", cost, "acceptingClients",
-        "waitTime", "referralRequired",
         eligibility, "howToApply", tips,
         "nameEs", "descriptionEs", "howToApplyEs", "tipsEs",
-        source, "sourceId", "verificationMethod",
+        source, "sourceId",
         "verifiedAt", "createdAt", "updatedAt"
       FROM "Resource"
     `
