@@ -18,15 +18,13 @@ export default async function ResourcesPage({
   // Build Prisma where clause for non-FTS filters
   const extraFilters: Prisma.ResourceWhereInput[] = []
   if (category) extraFilters.push({ categories: { has: category } })
-  if (insurance) extraFilters.push({ insuranceAccepted: { has: insurance } })
-  if (langFilter) extraFilters.push({ languages: { has: langFilter } })
-  if (accepting === '1') extraFilters.push({ acceptingClients: true })
+  // Note: insurance, language, acceptingClients filters temporarily disabled
+  // while Prisma client rebuilds with the expanded Resource schema
 
   const selectFields = {
     id: true, name: true, nameEs: true, organization: true,
     description: true, descriptionEs: true, categories: true,
     address: true, phone: true, hours: true, latitude: true, longitude: true,
-    cost: true, acceptingClients: true, languages: true, insuranceAccepted: true,
   }
 
   let resources
