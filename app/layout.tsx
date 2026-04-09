@@ -8,6 +8,10 @@ import ChatWidget from '@/components/ChatWidget'
 import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration'
 import { Analytics } from '@vercel/analytics/react'
 import PageViewTracker from '@/components/PageViewTracker'
+import { Geist } from "next/font/google";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
   title: 'New Haven Navigator',
@@ -52,7 +56,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={cn("font-sans", geist.variable)}>
       <body className="min-h-screen">
         <LanguageProvider>
           <TrackerProvider>
