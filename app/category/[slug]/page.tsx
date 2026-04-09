@@ -1,10 +1,10 @@
 import { notFound } from 'next/navigation'
+import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/db'
 import { CATEGORIES } from '@/lib/constants'
 import CategoryClient from './CategoryClient'
 
-// Revalidate category pages every hour
-export const revalidate = 3600
+export const dynamic = 'force-dynamic'
 
 export default async function CategoryPage({
   params
@@ -17,23 +17,15 @@ export default async function CategoryPage({
     notFound()
   }
 
-  const resources = await prisma.resource.findMany({
-    where: {
-      categories: { has: params.slug }
-    },
-    orderBy: { name: 'asc' },
-    select: {
-      id: true,
-      name: true,
-      nameEs: true,
-      organization: true,
-      description: true,
-      descriptionEs: true,
-      categories: true,
-      address: true,
-      phone: true
-    }
-  })
+  const resources = await prisma.$queryRaw<Record<string, unknown>[]>(
+    Prisma.sql`
+      SELECT id, name, "nameEs", organization, description, "descriptionEs",
+             categories, address, phone
+      FROM "Resource"
+      WHERE ${params.slug} = ANY(categories)
+      ORDER BY name ASC
+    `
+  )
 
-  return <CategoryClient slug={params.slug} resources={resources} />
+  return <CategoryClient slug={params.slug} resources={resources as any[]} />
 }
