@@ -33,21 +33,6 @@ const content = {
   }
 }
 
-// Category colors for visual variety
-const catColors: Record<string, string> = {
-  housing: '#E8F5E9',
-  food: '#FFF3E0',
-  cash: '#E8F5E9',
-  'harm-reduction': '#FCE4EC',
-  healthcare: '#E3F2FD',
-  'mental-health': '#F3E5F5',
-  employment: '#FFF8E1',
-  childcare: '#E0F7FA',
-  legal: '#EFEBE9',
-  transportation: '#E8EAF6',
-  utilities: '#FFF9C4',
-  immigration: '#F1F8E9',
-}
 
 export default function Home() {
   const { language } = useLanguage()
@@ -109,17 +94,17 @@ export default function Home() {
               {t.browseTitle}
             </h2>
             <nav aria-label={language === 'en' ? 'Resource categories' : 'Categorias de recursos'}>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-2.5">
                 {cats.map((category) => (
                   <Link
                     key={category.slug}
                     href={`/category/${category.slug}`}
-                    className="flex flex-col items-center text-center p-4 rounded-2xl transition-all duration-200 hover:scale-[1.03] hover:shadow-md"
-                    style={{ background: catColors[category.slug] || '#F5F5F5' }}
+                    className="flex flex-col items-center text-center p-3.5 rounded-xl transition-all duration-150 hover:border-[var(--color-primary)] hover:shadow-sm"
+                    style={{ background: 'var(--color-surface)', border: '1.5px solid var(--color-border)' }}
                     aria-label={category.ariaLabel}
                   >
-                    <span className="text-2xl mb-2" aria-hidden="true">{category.icon}</span>
-                    <span className="text-xs font-semibold leading-tight">{category.name}</span>
+                    <span className="text-xl mb-1.5" aria-hidden="true">{category.icon}</span>
+                    <span className="text-[12px] font-semibold leading-tight" style={{ color: 'var(--color-text)' }}>{category.name}</span>
                   </Link>
                 ))}
               </div>

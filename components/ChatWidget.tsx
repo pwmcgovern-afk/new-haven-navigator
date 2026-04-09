@@ -93,6 +93,7 @@ export default function ChatWidget() {
     { icon: '🧠', label: 'I need mental health support' },
     { icon: '💵', label: 'I need cash assistance' },
     { icon: '⚖️', label: 'I need legal help' },
+    { icon: '🌐', label: 'Necesito ayuda en español' },
   ]
 
   const handleSuggestionClick = (text: string) => {
