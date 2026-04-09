@@ -64,22 +64,9 @@ export default function Home() {
             <h1 className="text-[2rem] sm:text-[2.5rem] font-extrabold leading-[1.1] tracking-tight text-white mb-4">
               {t.heroTitle}
             </h1>
-            <p className="text-base sm:text-lg leading-relaxed text-white/80 mb-8" style={{ maxWidth: '38ch' }}>
+            <p className="text-base sm:text-lg leading-relaxed text-white/80 pb-2" style={{ maxWidth: '38ch' }}>
               {t.heroSub}
             </p>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Link href="/wizard">
-                <Button size="lg" className="w-full sm:w-auto text-[15px] font-semibold px-7 h-12 rounded-xl bg-white text-gray-900 hover:bg-gray-100">
-                  {t.heroCta}
-                  <svg className="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                </Button>
-              </Link>
-              <Link href="/resources">
-                <Button variant="outline" size="lg" className="w-full sm:w-auto text-[15px] font-semibold px-7 h-12 rounded-xl border-white/30 text-white hover:bg-white/10 bg-transparent">
-                  {t.heroSecondary}
-                </Button>
-              </Link>
-            </div>
           </section>
         </div>
       </div>
@@ -110,6 +97,21 @@ export default function Home() {
               </div>
             </nav>
           </section>
+
+          {/* CTAs — below categories */}
+          <div className="flex flex-col sm:flex-row gap-3 mb-10">
+            <Link href="/wizard" className="flex-1">
+              <Button size="lg" className="w-full text-[15px] font-semibold h-12 rounded-xl" style={{ background: 'var(--color-primary)', color: 'white' }}>
+                {t.heroCta}
+                <svg className="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+              </Button>
+            </Link>
+            <Link href="/resources" className="flex-1">
+              <Button variant="outline" size="lg" className="w-full text-[15px] font-semibold h-12 rounded-xl">
+                {t.heroSecondary}
+              </Button>
+            </Link>
+          </div>
 
           {/* 211 CTA */}
           <section className="rounded-2xl p-6 mb-6 text-center" style={{ background: '#F0FAF0', border: '1px solid #C8E6C9' }}>
