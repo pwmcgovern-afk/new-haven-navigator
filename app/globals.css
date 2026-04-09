@@ -778,6 +778,13 @@
     100% { background-position: -200% 0; }
   }
 
+  /* Category card hover */
+  .group:hover {
+    border-color: var(--color-primary) !important;
+    box-shadow: 0 4px 16px rgba(13, 110, 110, 0.1);
+    transform: translateY(-1px);
+  }
+
   /* Glass effect - removed for performance/accessibility */
   .glass {
     background: var(--color-surface);
