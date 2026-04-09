@@ -1,13 +1,16 @@
 import { MetadataRoute } from 'next'
 import { prisma } from '@/lib/db'
 
+// Force dynamic so sitemap doesn't try to query DB at build time
+export const dynamic = 'force-dynamic'
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const resources = await prisma.resource.findMany({
     select: { id: true, updatedAt: true },
   })
 
   const resourceUrls = resources.map((r) => ({
-    url: `https://new-haven-navigator.vercel.app/resources/${r.id}`,
+    url: `https://www.nhvnavigator.com/resources/${r.id}`,
     lastModified: r.updatedAt,
   }))
 
@@ -18,14 +21,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ]
 
   const categoryUrls = categories.map((slug) => ({
-    url: `https://new-haven-navigator.vercel.app/category/${slug}`,
+    url: `https://www.nhvnavigator.com/category/${slug}`,
     lastModified: new Date(),
   }))
 
   return [
-    { url: 'https://new-haven-navigator.vercel.app', lastModified: new Date() },
-    { url: 'https://new-haven-navigator.vercel.app/resources', lastModified: new Date() },
-    { url: 'https://new-haven-navigator.vercel.app/wizard', lastModified: new Date() },
+    { url: 'https://www.nhvnavigator.com', lastModified: new Date() },
+    { url: 'https://www.nhvnavigator.com/resources', lastModified: new Date() },
+    { url: 'https://www.nhvnavigator.com/wizard', lastModified: new Date() },
     ...categoryUrls,
     ...resourceUrls,
   ]
