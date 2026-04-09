@@ -4,33 +4,34 @@ import Link from 'next/link'
 import { useLanguage } from '@/components/LanguageContext'
 import LanguageToggle from '@/components/LanguageToggle'
 import { getCategoriesWithDetails } from '@/lib/categories'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
 
 const content = {
   en: {
-    title: 'New Haven Navigator',
-    heroTitle: 'Find help in\nNew Haven',
-    heroSubtitle: 'Free, bilingual directory of 192 social services — food, housing, healthcare, legal aid, and more.',
-    heroButton: 'Find Resources for Me',
-    browseAll: 'Browse All Resources',
-    browseTitle: 'Browse by Category',
+    heroTitle: 'Find free help\nin New Haven',
+    heroSub: '192 social services. Bilingual. Updated regularly.',
+    heroCta: 'Find Resources for Me',
+    heroSecondary: 'Browse All',
+    browseTitle: 'Categories',
     call211: 'Call 211',
-    call211Sub: 'Free help finding services, 24/7',
+    call211Sub: 'Free, confidential helpline — 24/7',
     skipToMain: 'Skip to main content',
-    footer1: 'A free community resource · Not a government agency',
-    openChat: 'Or ask our AI assistant',
+    footer: 'A free community resource. Not a government agency.',
+    learnMore: 'Learn more →',
   },
   es: {
-    title: 'Navegador de New Haven',
     heroTitle: 'Encuentre ayuda\nen New Haven',
-    heroSubtitle: 'Directorio gratuito y bilingue de 192 servicios sociales — comida, vivienda, salud, ayuda legal y mas.',
-    heroButton: 'Buscar Recursos para Mi',
-    browseAll: 'Ver Todos los Recursos',
-    browseTitle: 'Buscar por Categoria',
+    heroSub: '192 servicios sociales. Bilingue. Actualizado regularmente.',
+    heroCta: 'Buscar Recursos',
+    heroSecondary: 'Ver Todos',
+    browseTitle: 'Categorias',
     call211: 'Llamar al 211',
-    call211Sub: 'Ayuda gratuita para encontrar servicios, 24/7',
+    call211Sub: 'Linea de ayuda gratuita y confidencial — 24/7',
     skipToMain: 'Saltar al contenido principal',
-    footer1: 'Un recurso comunitario gratuito · No es una agencia gubernamental',
-    openChat: 'O pregunte a nuestro asistente',
+    footer: 'Un recurso comunitario gratuito. No es una agencia del gobierno.',
+    learnMore: 'Ver mas →',
   }
 }
 
@@ -43,88 +44,72 @@ export default function Home() {
     <div className="min-h-screen">
       <a href="#main-content" className="skip-link">{t.skipToMain}</a>
 
-      {/* Minimal header */}
+      {/* Header */}
       <header className="px-5 pt-5 pb-2 flex items-center justify-between" role="banner">
-        <span className="text-sm font-semibold tracking-wide uppercase" style={{ color: 'var(--color-text-muted)', letterSpacing: '0.08em' }}>
-          {t.title}
+        <span className="text-[13px] font-medium tracking-widest uppercase" style={{ color: 'var(--color-text-muted)' }}>
+          New Haven Navigator
         </span>
         <LanguageToggle />
       </header>
 
-      <main id="main-content" className="px-5 pb-10" role="main">
+      <main id="main-content" className="px-5 pb-12" role="main">
 
-        {/* Hero — big bold text, not a card */}
-        <section className="pt-8 pb-10">
-          <h1 className="font-bold leading-[1.1] tracking-tight mb-5" style={{ fontSize: 'clamp(2.25rem, 8vw, 3rem)', color: 'var(--color-text)', whiteSpace: 'pre-line' }}>
+        {/* Hero */}
+        <section className="pt-10 pb-8">
+          <h1 className="text-[2.5rem] sm:text-5xl font-extrabold leading-[1.08] tracking-tight mb-4" style={{ whiteSpace: 'pre-line' }}>
             {t.heroTitle}
           </h1>
-          <p className="text-lg leading-relaxed mb-8" style={{ color: 'var(--color-text-secondary)', maxWidth: '36ch' }}>
-            {t.heroSubtitle}
+          <p className="text-[1.125rem] leading-relaxed mb-8" style={{ color: 'var(--color-text-secondary)', maxWidth: '34ch' }}>
+            {t.heroSub}
           </p>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Link href="/wizard" className="btn-primary text-center" style={{ fontSize: '1.0625rem', padding: '0.875rem 1.75rem' }}>
-              {t.heroButton}
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
+          <div className="flex gap-3">
+            <Link href="/wizard">
+              <Button size="lg" className="text-[15px] font-semibold px-6 h-12 rounded-xl" style={{ background: 'var(--color-primary)', color: 'white' }}>
+                {t.heroCta}
+                <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+              </Button>
             </Link>
-            <Link href="/resources" className="btn-secondary text-center" style={{ fontSize: '1.0625rem', padding: '0.875rem 1.75rem' }}>
-              {t.browseAll}
+            <Link href="/resources">
+              <Button variant="outline" size="lg" className="text-[15px] font-semibold px-6 h-12 rounded-xl">
+                {t.heroSecondary}
+              </Button>
             </Link>
           </div>
         </section>
 
-        {/* Quick stats strip */}
-        <div className="flex items-center gap-6 py-4 mb-8 overflow-x-auto" style={{ borderTop: '1px solid var(--color-border)', borderBottom: '1px solid var(--color-border)' }}>
-          <div className="flex items-center gap-2 shrink-0">
-            <span className="text-2xl font-bold" style={{ color: 'var(--color-primary)' }}>192</span>
-            <span className="text-sm" style={{ color: 'var(--color-text-muted)' }}>{language === 'es' ? 'recursos' : 'resources'}</span>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <span className="text-2xl font-bold" style={{ color: 'var(--color-primary)' }}>12</span>
-            <span className="text-sm" style={{ color: 'var(--color-text-muted)' }}>{language === 'es' ? 'categorias' : 'categories'}</span>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <span className="text-2xl font-bold" style={{ color: 'var(--color-primary)' }}>EN/ES</span>
-            <span className="text-sm" style={{ color: 'var(--color-text-muted)' }}>{language === 'es' ? 'bilingue' : 'bilingual'}</span>
-          </div>
-        </div>
+        <Separator className="mb-8" />
 
-        {/* Category Grid — wider cards, less cluttered */}
+        {/* Categories */}
         <section className="mb-10" aria-labelledby="browse-heading">
-          <h2 id="browse-heading" className="text-sm font-semibold uppercase tracking-wide mb-4" style={{ color: 'var(--color-text-muted)', letterSpacing: '0.08em' }}>
+          <h2 id="browse-heading" className="text-[13px] font-medium tracking-widest uppercase mb-5" style={{ color: 'var(--color-text-muted)' }}>
             {t.browseTitle}
           </h2>
           <nav aria-label={language === 'en' ? 'Resource categories' : 'Categorias de recursos'}>
-            <div className="grid grid-cols-2 gap-3 stagger-children">
-              {cats.map((category) => (
+            <div className="grid grid-cols-1 gap-px rounded-xl overflow-hidden border" style={{ borderColor: 'var(--color-border)', background: 'var(--color-border)' }}>
+              {cats.map((category, i) => (
                 <Link
                   key={category.slug}
                   href={`/category/${category.slug}`}
-                  className="group flex items-start gap-3 p-4 rounded-xl transition-all duration-200"
-                  style={{
-                    background: 'var(--color-surface)',
-                    border: '1.5px solid var(--color-border)',
-                  }}
+                  className="flex items-center gap-4 px-4 py-3.5 transition-colors hover:bg-gray-50"
+                  style={{ background: 'var(--color-surface)' }}
                   aria-label={category.ariaLabel}
                 >
-                  <span className="text-2xl shrink-0 mt-0.5" aria-hidden="true">{category.icon}</span>
-                  <div className="min-w-0">
-                    <div className="font-semibold text-sm" style={{ color: 'var(--color-text)' }}>{category.name}</div>
-                    <div className="text-xs mt-0.5 leading-snug" style={{ color: 'var(--color-text-muted)' }}>{category.description}</div>
+                  <span className="text-xl w-8 text-center shrink-0" aria-hidden="true">{category.icon}</span>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-[15px] font-semibold">{category.name}</span>
+                    <span className="text-sm ml-2" style={{ color: 'var(--color-text-muted)' }}>{category.description}</span>
                   </div>
+                  <svg className="w-4 h-4 shrink-0" style={{ color: 'var(--color-text-muted)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                 </Link>
               ))}
             </div>
           </nav>
         </section>
 
-        {/* 211 CTA — minimal, not a card */}
-        <section className="py-6 text-center" style={{ borderTop: '1px solid var(--color-border)' }}>
-          <a href="tel:211" className="inline-flex items-center gap-3 text-lg font-bold transition-colors" style={{ color: 'var(--color-success)' }}>
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-            </svg>
+        {/* 211 CTA */}
+        <section className="text-center py-6 rounded-xl mb-4" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
+          <a href="tel:211" className="inline-flex items-center gap-2 text-xl font-bold" style={{ color: 'var(--color-success)' }}>
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
             {t.call211}
           </a>
           <p className="text-sm mt-1" style={{ color: 'var(--color-text-muted)' }}>{t.call211Sub}</p>
@@ -133,7 +118,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="px-5 py-5 text-center text-xs" style={{ color: 'var(--color-text-muted)' }} role="contentinfo">
-        <p>{t.footer1}</p>
+        {t.footer}
       </footer>
     </div>
   )

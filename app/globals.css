@@ -116,13 +116,12 @@
   }
 
   body {
-    @apply antialiased bg-background text-foreground;
+    @apply antialiased bg-background text-foreground font-sans;
     background: var(--color-bg);
     color: var(--color-text);
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    font-size: 1rem;      /* 16px minimum */
-    line-height: 1.6;     /* Generous line height for readability */
-    letter-spacing: 0.01em;
+    font-size: 1rem;
+    line-height: 1.6;
+    letter-spacing: -0.01em;
   }
 
   /* Typography - Clear hierarchy */
