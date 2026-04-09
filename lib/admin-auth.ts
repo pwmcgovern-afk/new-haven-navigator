@@ -1,4 +1,5 @@
-import { createHmac, createHash, timingSafeEqual } from 'crypto'
+import { createHmac, timingSafeEqual } from 'crypto'
+import bcrypt from 'bcryptjs'
 import { prisma } from './db'
 
 const COOKIE_NAME = 'admin_session'
@@ -10,9 +11,9 @@ function getAdminKey(): string {
   return key
 }
 
-// Hash password for storage (SHA-256 — adequate for single-admin tool)
+// Hash password for storage using bcrypt (work factor 12)
 export function hashPassword(password: string): string {
-  return createHash('sha256').update(password).digest('hex')
+  return bcrypt.hashSync(password, 12)
 }
 
 export function createSessionToken(): string {
@@ -67,8 +68,21 @@ export async function verifyEmailPassword(email: string, password: string): Prom
   const user = await prisma.adminUser.findUnique({ where: { email } })
   if (!user) return null
 
-  const hash = hashPassword(password)
-  if (hash !== user.passwordHash) return null
+  // Support both bcrypt and legacy SHA-256 hashes during migration
+  const isBcrypt = user.passwordHash.startsWith('$2')
+  if (isBcrypt) {
+    if (!bcrypt.compareSync(password, user.passwordHash)) return null
+  } else {
+    // Legacy SHA-256 — upgrade to bcrypt on successful login
+    const { createHash } = await import('crypto')
+    const legacyHash = createHash('sha256').update(password).digest('hex')
+    if (legacyHash !== user.passwordHash) return null
+    // Upgrade the hash
+    await prisma.adminUser.update({
+      where: { id: user.id },
+      data: { passwordHash: bcrypt.hashSync(password, 12) }
+    })
+  }
 
   // Update last login
   await prisma.adminUser.update({
