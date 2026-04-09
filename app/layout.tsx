@@ -19,16 +19,23 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'New Haven Navigator',
-    description: 'Find social services, benefits, and resources in New Haven, CT',
-    url: 'https://new-haven-navigator.vercel.app',
+    description: '192 bilingual resources to help New Haven residents find food, housing, healthcare, and more.',
+    url: 'https://www.nhvnavigator.com',
     siteName: 'New Haven Navigator',
     locale: 'en_US',
     type: 'website',
+    images: [{
+      url: 'https://www.nhvnavigator.com/og-image.png',
+      width: 1200,
+      height: 630,
+      alt: 'New Haven Navigator — Find resources to help you thrive',
+    }],
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
     title: 'New Haven Navigator',
-    description: 'Find social services, benefits, and resources in New Haven, CT',
+    description: '192 bilingual resources to help New Haven residents find food, housing, healthcare, and more.',
+    images: ['https://www.nhvnavigator.com/og-image.png'],
   },
 }
 

@@ -255,11 +255,22 @@ export default function ChatWidget() {
                     <button
                       key={i}
                       onClick={() => handleSuggestionClick(s.label)}
-                      className="text-left text-sm px-4 py-2.5 rounded-2xl transition-colors hover:opacity-80"
+                      className="text-left text-sm px-4 py-2.5 rounded-2xl transition-all duration-200"
                       style={{
                         background: 'var(--color-surface)',
                         border: '1.5px solid var(--color-border)',
                         color: 'var(--color-text)',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                      }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.transform = 'translateY(-1px)'
+                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(13,110,110,0.12)'
+                        e.currentTarget.style.borderColor = 'var(--color-primary)'
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.transform = 'translateY(0)'
+                        e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)'
+                        e.currentTarget.style.borderColor = 'var(--color-border)'
                       }}
                     >
                       <span className="mr-2" aria-hidden="true">{s.icon}</span>
@@ -356,12 +367,13 @@ export default function ChatWidget() {
       <button
         ref={bubbleRef}
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 z-50 flex items-center justify-center rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95"
+        className="fixed bottom-6 right-6 z-50 flex items-center justify-center rounded-full transition-all duration-200 hover:scale-110 active:scale-95"
         style={{
           width: '56px',
           height: '56px',
           background: 'var(--color-primary)',
           color: 'white',
+          boxShadow: '0 4px 20px rgba(13, 110, 110, 0.35)',
         }}
         aria-label={isOpen ? t('chatClose') : t('chatOpen')}
       >

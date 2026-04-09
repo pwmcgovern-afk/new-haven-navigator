@@ -234,7 +234,7 @@ export default function ResourcesClient({ resources, query, category, insurance,
         {/* Results */}
         <section aria-label={t.resultsLabel}>
           {filteredResources.length > 0 ? (
-            <ul className="space-y-3" role="list">
+            <ul className="space-y-4" role="list">
               {filteredResources.map((resource) => {
                 const name = language === 'es' && resource.nameEs ? resource.nameEs : resource.name
                 const description = language === 'es' && resource.descriptionEs ? resource.descriptionEs : resource.description
