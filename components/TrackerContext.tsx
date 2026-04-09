@@ -74,6 +74,7 @@ export function TrackerProvider({ children }: { children: ReactNode }) {
                 resourceNameEs: e.resourceNameEs || undefined,
                 organizationName: e.organizationName || undefined,
                 status: e.status,
+                outcome: e.outcome || '',
                 contactPerson: e.contactPerson,
                 dateContacted: e.dateContacted,
                 notes: e.notes,
