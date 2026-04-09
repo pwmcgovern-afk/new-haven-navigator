@@ -81,17 +81,20 @@ export default function Home() {
               {t.browseTitle}
             </h2>
             <nav aria-label={language === 'en' ? 'Resource categories' : 'Categorias de recursos'}>
-              <div className="grid grid-cols-3 gap-2.5">
+              <div className="grid grid-cols-2 gap-3">
                 {cats.map((category) => (
                   <Link
                     key={category.slug}
                     href={`/category/${category.slug}`}
-                    className="flex flex-col items-center text-center p-3.5 rounded-xl transition-all duration-150 hover:border-[var(--color-primary)] hover:shadow-sm"
+                    className="flex items-start gap-3 p-3.5 rounded-xl transition-all duration-150 hover:border-[var(--color-primary)] hover:shadow-sm"
                     style={{ background: 'var(--color-surface)', border: '1.5px solid var(--color-border)' }}
                     aria-label={category.ariaLabel}
                   >
-                    <span className="text-xl mb-1.5" aria-hidden="true">{category.icon}</span>
-                    <span className="text-[12px] font-semibold leading-tight" style={{ color: 'var(--color-text)' }}>{category.name}</span>
+                    <span className="text-2xl shrink-0" aria-hidden="true">{category.icon}</span>
+                    <div className="min-w-0">
+                      <div className="text-[13px] font-semibold" style={{ color: 'var(--color-text)' }}>{category.name}</div>
+                      <div className="text-[11px] leading-snug mt-0.5" style={{ color: 'var(--color-text-muted)' }}>{category.description}</div>
+                    </div>
                   </Link>
                 ))}
               </div>
