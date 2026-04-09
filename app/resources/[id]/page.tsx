@@ -19,9 +19,12 @@ export default async function ResourceDetailPage({
         id, name, organization, description, categories,
         address, city, state, zip, latitude, longitude,
         phone, website, email, hours,
+        languages, "insuranceAccepted", cost, "acceptingClients",
+        "waitTime", "referralRequired",
         eligibility, "howToApply", tips,
         "nameEs", "descriptionEs", "howToApplyEs", "tipsEs",
-        source, "sourceId", "verifiedAt", "createdAt", "updatedAt"
+        source, "sourceId", "verificationMethod",
+        "verifiedAt", "createdAt", "updatedAt"
       FROM "Resource"
       WHERE id = ${params.id}
     `
@@ -34,8 +37,12 @@ export default async function ResourceDetailPage({
   const row = rows[0]
   const resource = {
     ...row,
-    tips: row.tips || [],
-    tipsEs: row.tipsEs || [],
+    tips: (row.tips as string[] | null) || [],
+    tipsEs: (row.tipsEs as string[] | null) || [],
+    languages: (row.languages as string[] | null) || [],
+    insuranceAccepted: (row.insuranceAccepted as string[] | null) || [],
+    acceptingClients: row.acceptingClients ?? true,
+    referralRequired: row.referralRequired ?? false,
   } as unknown as Resource
 
   return <ResourceDetailClient resource={resource} />

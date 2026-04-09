@@ -1,10 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  typescript: {
-    // TODO: Fix remaining type errors and remove this
-    ignoreBuildErrors: true,
-  },
   headers: async () => [
     {
       source: '/api/:path*',

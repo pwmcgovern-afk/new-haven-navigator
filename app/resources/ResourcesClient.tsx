@@ -99,7 +99,7 @@ export default function ResourcesClient({ resources, query, category, insurance,
   }, [nearbySort, userLocation])
 
   // Filter and sort
-  let filteredResources = openNowFilter
+  let filteredResources: (Resource & { distance?: number })[] = openNowFilter
     ? resources.filter(r => isOpenNow(r.hours) !== false)
     : [...resources]
 
@@ -111,7 +111,7 @@ export default function ResourcesClient({ resources, query, category, insurance,
           ? getDistanceMiles(userLocation.lat, userLocation.lng, r.latitude, r.longitude)
           : 999,
       }))
-      .sort((a, b) => a.distance - b.distance)
+      .sort((a, b) => (a.distance ?? 999) - (b.distance ?? 999))
   }
 
   return (
@@ -260,7 +260,7 @@ export default function ResourcesClient({ resources, query, category, insurance,
                         {resource.phone && (
                           <p className="text-sm font-medium" style={{ color: 'var(--color-primary)' }}>{resource.phone}</p>
                         )}
-                        {'distance' in resource && typeof resource.distance === 'number' && resource.distance < 100 && (
+                        {resource.distance != null && resource.distance < 100 && (
                           <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
                             {resource.distance.toFixed(1)} mi
                           </span>

@@ -72,7 +72,7 @@ async function searchServices(apiKey: string, query: string): Promise<Service211
     throw new Error(`211 API error: ${response.status} ${response.statusText}`)
   }
 
-  const data = await response.json()
+  const data = await response.json() as { results?: Service211[] }
   return data.results || []
 }
 
