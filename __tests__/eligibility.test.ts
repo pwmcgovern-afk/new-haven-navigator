@@ -26,7 +26,7 @@ const baseResource: ResourceWithEligibility = {
 
 describe('calculateEligibilityScore', () => {
   it('returns 100 for resource with no eligibility criteria', () => {
-    const score = calculateEligibilityScore(baseUser, baseResource)
+    const { score } = calculateEligibilityScore(baseUser, baseResource)
     assert.equal(score, 100)
   })
 
@@ -36,7 +36,7 @@ describe('calculateEligibilityScore', () => {
       eligibility: { incomeLimitPctFpl: 50 },
     }
     const user = { ...baseUser, monthlyIncome: 5000 }
-    const score = calculateEligibilityScore(user, resource)
+    const { score } = calculateEligibilityScore(user, resource)
     assert.equal(score, 0)
   })
 
@@ -48,8 +48,8 @@ describe('calculateEligibilityScore', () => {
     const veteranUser = { ...baseUser, populations: ['veteran'] }
     const nonVeteranUser = { ...baseUser, populations: [] }
 
-    const veteranScore = calculateEligibilityScore(veteranUser, resource)
-    const nonVeteranScore = calculateEligibilityScore(nonVeteranUser, resource)
+    const { score: veteranScore } = calculateEligibilityScore(veteranUser, resource)
+    const { score: nonVeteranScore } = calculateEligibilityScore(nonVeteranUser, resource)
 
     assert.ok(veteranScore > nonVeteranScore, 'veteran should score higher')
   })
@@ -60,7 +60,7 @@ describe('calculateEligibilityScore', () => {
       categories: ['legal'],
     }
     const user = { ...baseUser, categoriesNeeded: ['food'] }
-    const score = calculateEligibilityScore(user, resource)
+    const { score } = calculateEligibilityScore(user, resource)
     assert.ok(score < 100, 'category mismatch should reduce score')
   })
 })

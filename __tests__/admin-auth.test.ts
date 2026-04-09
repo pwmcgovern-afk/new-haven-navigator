@@ -8,8 +8,8 @@ import assert from 'node:assert/strict'
 // Set test API key before importing module
 process.env.ADMIN_API_KEY = 'test-secret-key-12345'
 
-// Dynamic import after env is set
-const { createSessionToken, verifySessionToken, verifyApiKey } = await import('../lib/admin-auth')
+// Use require to avoid top-level await
+const { createSessionToken, verifySessionToken, verifyApiKey } = require('../lib/admin-auth') as typeof import('../lib/admin-auth')
 
 describe('admin-auth', () => {
   describe('createSessionToken', () => {
