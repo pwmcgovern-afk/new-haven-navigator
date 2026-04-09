@@ -59,8 +59,23 @@ export default function Home() {
             <LanguageToggle />
           </header>
 
+          {/* Elm tree icon */}
+          <div className="pt-6 pb-2">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ opacity: 0.5 }}>
+              {/* Canopy */}
+              <ellipse cx="20" cy="14" rx="12" ry="10" fill="white" />
+              <ellipse cx="14" cy="16" rx="7" ry="7" fill="white" />
+              <ellipse cx="26" cy="16" rx="7" ry="7" fill="white" />
+              <ellipse cx="20" cy="10" rx="8" ry="7" fill="white" />
+              {/* Trunk */}
+              <rect x="18" y="22" width="4" height="14" rx="2" fill="white" />
+              {/* Roots */}
+              <path d="M16 34 C18 32, 18 36, 20 36 C22 36, 22 32, 24 34" stroke="white" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+            </svg>
+          </div>
+
           {/* Hero content */}
-          <section className="pt-8 pb-12" id="main-content">
+          <section className="pb-12" id="main-content">
             <h1 className="text-[2rem] sm:text-[2.5rem] font-extrabold leading-[1.1] tracking-tight text-white mb-4">
               {t.heroTitle}
             </h1>
