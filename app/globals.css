@@ -64,35 +64,14 @@
     --radius-full: 9999px;
   }
 
-  /* Dark mode */
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --color-primary: #1B9A9A;
-      --color-primary-hover: #22ADAD;
-      --color-primary-light: #0F3F3F;
-      --color-success: #34D399;
-      --color-success-light: #0F2F1F;
-      --color-warning: #D4A017;
-      --color-warning-light: #2F2410;
-      --color-error: #F87171;
-      --color-error-light: #2F1015;
-      --color-text: #F0F0F0;
-      --color-text-secondary: #B0B0B0;
-      --color-text-muted: #808080;
-      --color-bg: #0A0A0A;
-      --color-surface: #161616;
-      --color-border: #2A2A2A;
-      --color-border-strong: #404040;
-      --color-focus: #1B9A9A;
-    }
-  }
+  /* Force light mode regardless of system preference */
 
   /* Base styles */
   html {
     font-size: 100%; /* Respect user's browser settings */
     -webkit-tap-highlight-color: transparent;
     scroll-behavior: smooth;
-    color-scheme: light;
+    color-scheme: light only;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -478,12 +457,6 @@
     box-shadow: 0 0 0 3px var(--color-primary-light), 0 0 0 5px white;
   }
 
-  @media (prefers-color-scheme: dark) {
-    .hero-card {
-      background: linear-gradient(135deg, #0F5555 0%, #082E2E 100%);
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-    }
-  }
 
   /* ============================================
      INFO CARDS - Status messages

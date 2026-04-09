@@ -256,15 +256,20 @@ export default function ResourcesClient({ resources, query, category, insurance,
                         <p className="text-sm mb-2" style={{ color: 'var(--color-text-secondary)' }}>{resource.organization}</p>
                       )}
                       <p className="text-sm line-clamp-2" style={{ color: 'var(--color-text-secondary)' }}>{description}</p>
-                      <div className="flex items-center gap-3 mt-2">
-                        {resource.phone && (
-                          <p className="text-sm font-medium" style={{ color: 'var(--color-primary)' }}>{resource.phone}</p>
-                        )}
-                        {resource.distance != null && resource.distance < 100 && (
-                          <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
-                            {resource.distance.toFixed(1)} mi
-                          </span>
-                        )}
+                      <div className="flex items-center justify-between mt-3">
+                        <div className="flex items-center gap-3">
+                          {resource.phone && (
+                            <span className="text-sm font-medium" style={{ color: 'var(--color-primary)' }}>{resource.phone}</span>
+                          )}
+                          {resource.distance != null && resource.distance < 100 && (
+                            <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                              {resource.distance.toFixed(1)} mi
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-xs font-medium" style={{ color: 'var(--color-primary)' }}>
+                          {language === 'es' ? 'Ver detalles →' : 'Learn more →'}
+                        </span>
                       </div>
                     </Link>
                   </li>

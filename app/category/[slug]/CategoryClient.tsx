@@ -107,9 +107,14 @@ export default function CategoryClient({ slug, resources }: Props) {
                     <p className="text-sm text-[var(--color-text-secondary)] mb-2">{resource.organization}</p>
                   )}
                   <p className="text-sm text-[var(--color-text-secondary)] line-clamp-2">{description}</p>
-                  {resource.phone && (
-                    <p className="text-sm text-[var(--color-primary)] mt-2 font-medium">{resource.phone}</p>
-                  )}
+                  <div className="flex items-center justify-between mt-3">
+                    {resource.phone && (
+                      <span className="text-sm text-[var(--color-primary)] font-medium">{resource.phone}</span>
+                    )}
+                    <span className="text-xs font-medium" style={{ color: 'var(--color-primary)' }}>
+                      {language === 'es' ? 'Ver detalles →' : 'Learn more →'}
+                    </span>
+                  </div>
                 </Link>
               )
             })}

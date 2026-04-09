@@ -143,9 +143,14 @@ export default function ResultsClient({ resources, selectedCategories }: Props) 
                     <p className="text-sm text-[var(--color-text-secondary)] mb-2">{resource.organization}</p>
                   )}
                   <p className="text-sm text-[var(--color-text-secondary)] line-clamp-2">{description}</p>
-                  {resource.phone && (
-                    <p className="text-sm text-[var(--color-primary)] mt-2 font-medium">{resource.phone}</p>
-                  )}
+                  <div className="flex items-center justify-between mt-3">
+                    {resource.phone && (
+                      <span className="text-sm text-[var(--color-primary)] font-medium">{resource.phone}</span>
+                    )}
+                    <span className="text-xs font-medium" style={{ color: 'var(--color-primary)' }}>
+                      {language === 'es' ? 'Ver detalles →' : 'Learn more →'}
+                    </span>
+                  </div>
                   {resource.matchReasons && resource.matchReasons.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mt-2">
                       {resource.matchReasons.filter(r => r.type === 'match').slice(0, 3).map((reason, i) => (
