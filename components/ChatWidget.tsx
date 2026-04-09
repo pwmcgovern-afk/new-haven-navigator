@@ -367,10 +367,11 @@ export default function ChatWidget() {
       <button
         ref={bubbleRef}
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 transition-all duration-200 hover:scale-105 active:scale-95"
+        className="fixed bottom-6 right-6 z-50 flex items-center justify-center gap-2 transition-all duration-200 hover:scale-105 active:scale-95 whitespace-nowrap"
         style={{
           height: '48px',
-          padding: isOpen ? '0 16px' : '0 20px',
+          minWidth: isOpen ? '48px' : '110px',
+          padding: isOpen ? '0' : '0 20px',
           borderRadius: '24px',
           background: 'var(--color-primary)',
           color: 'white',
